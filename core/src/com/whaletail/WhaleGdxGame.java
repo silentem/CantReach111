@@ -12,14 +12,15 @@ import com.whaletail.screens.MenuScreen;
 import com.whaletail.screens.PlayScreen;
 
 public class WhaleGdxGame extends Game {
-	public SpriteBatch batch;
-	public static final int V_WIDTH = 480;
-	public static final int V_HEIGHT = 800;
-	@Override
-	public void create () {
-		batch = new SpriteBatch();
-		setScreen(new MenuScreen(this));
-	}
+    public SpriteBatch batch;
+    public static final int V_WIDTH = 480;
+    public static final int V_HEIGHT = 800;
+
+    @Override
+    public void create() {
+        batch = new SpriteBatch();
+        setScreen(new MenuScreen(this));
+    }
 
     @Override
     public void render() {

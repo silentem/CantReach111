@@ -31,12 +31,14 @@ import static com.whaletail.sprites.EnemySquare.ENEMY_SPACE;
  */
 
 public class PlayerSquare extends Actor {
-    public enum State {STANDING, TELEPORTING, MOVING}
 
+
+    public enum State {STANDING, TELEPORTING, MOVING;}
     private static final int PLAYER_WIDTH = 32;
-    private static final int PLAYER_HEIGHT = 32;
 
+    private static final int PLAYER_HEIGHT = 32;
     public State state;
+    private boolean overlaps;
     private Sprite sprite;
     private Texture texture;
     private Texture teleAnimTexture;
@@ -53,6 +55,7 @@ public class PlayerSquare extends Actor {
     private boolean dead;
     private Vector2 direction;
     private OrthographicCamera camera;
+    private Vector2 jumpPos;
 
     public PlayerSquare(World world, OrthographicCamera camera, float x, float y) {
         this.world = world;
@@ -65,6 +68,7 @@ public class PlayerSquare extends Actor {
         invulnerable = false;
         animated = false;
         dead = false;
+        jumpPos = new Vector2();
         animFrames = new Array<TextureRegion>();
         moveAnimFrames = new Array<TextureRegion>();
         time = 0;
@@ -116,8 +120,8 @@ public class PlayerSquare extends Actor {
         if (!isDead()) {
             sprite.setPosition(getX() - getWidth() / 2, getY() - getHeight() / 2);
             setPosition(getX(), getY());
-            if (getY() > camera.viewportHeight / 2 && !isDead() && state == State.MOVING) {
-                camera.position.y = getY();
+            if (getY() > camera.viewportHeight / 2 - 128 && !isDead() && (state == State.MOVING || state == State.TELEPORTING)) {
+                camera.position.y = getY() + 128;
                 camera.update();
             }
         }
@@ -135,8 +139,6 @@ public class PlayerSquare extends Actor {
         float x = body.getPosition().x * PPM;
         float y = body.getPosition().y * PPM;
         body.destroyFixture(body.getFixtureList().get(0));
-        System.out.println("x = " + x);
-        System.out.println("y = " + y);
         world.destroyBody(body);
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
@@ -152,7 +154,7 @@ public class PlayerSquare extends Actor {
         System.out.println("moving");
         if (state == State.STANDING) {
             direction.y = direction.y + ENEMY_SPACE;
-            addAction(Actions.moveTo(getX(), direction.y, 0.2f));
+            addAction(Actions.moveTo(getX(), direction.y, 0.1f));
             animated = true;
             state = State.MOVING;
         }
@@ -160,20 +162,20 @@ public class PlayerSquare extends Actor {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        if (!isDead()) {
+        if (!isDead() && !overlaps) {
             if (state == State.STANDING) {
                 sprite.draw(batch);
                 time = 0;
             } else if (state == State.TELEPORTING && !tAnimation.isAnimationFinished(time)) {
                 time += Gdx.graphics.getDeltaTime();
                 invulnerable = true;
-                animated = true;
-                if (camera.position.y < direction.y + ENEMY_SPACE * 2) {
-                    camera.position.y += 45/3;
-                }
-                batch.draw(tAnimation.getKeyFrame(time), getX() - getWidth() / 2 - 16, getY() - getHeight() / 2 - 16);
-            } else if (state == State.TELEPORTING && tAnimation.isAnimationFinished(time)) {
                 jump();
+                animated = true;
+//                if (camera.position.y < direction.y + ENEMY_SPACE * 2) {
+//                    camera.position.y += 15;
+//                }
+                batch.draw(tAnimation.getKeyFrame(time), jumpPos.x - getWidth() / 2 - 16, jumpPos.y - getHeight() / 2 - 16);
+            } else if (state == State.TELEPORTING && tAnimation.isAnimationFinished(time)) {
                 invulnerable = false;
                 animated = false;
                 state = State.STANDING;
@@ -194,17 +196,26 @@ public class PlayerSquare extends Actor {
     }
 
     public void jump() {
-        state = State.TELEPORTING;
-        direction.y += ENEMY_SPACE * 2;
-        setY(getY() + ENEMY_SPACE * 2);
-        state = State.STANDING;
+        if (!animated){
+            state = State.TELEPORTING;
+            jumpPos.set(getX(), getY());
+            direction.y += ENEMY_SPACE * 2;
+            addAction(Actions.moveTo(getX(), direction.y, 1/15f));
+        }
     }
 
     public boolean collides(EnemySquare square) {
-        if (invulnerable) return false;
         Rectangle enemy = new Rectangle(square.getX() - square.getWidth() / 2, square.getY() - square.getHeight() / 2, square.getWidth(), square.getHeight());
-        Rectangle player = new Rectangle(getX() - getWidth() / 2, getY() - getHeight() / 2, getWidth(), getHeight());
-        return player.overlaps(enemy);
+        Rectangle player = new Rectangle(body.getPosition().x*PPM - getWidth() / 2, body.getPosition().y*PPM - getHeight() / 2, getWidth(), getHeight());
+        if (player.overlaps(enemy)) {
+            overlaps = true;
+            System.out.println("Dead");
+            if (isInvulnerable()){
+                return false;
+            } else return true;
+        }
+        overlaps = false;
+        return false;
     }
 
     private class Shards {
@@ -243,14 +254,16 @@ public class PlayerSquare extends Actor {
             float angle = body.getAngle() * MathUtils.radiansToDegrees;
             float x = getBody().getPosition().x * PPM - w / 2;
             float y = getBody().getPosition().y * PPM - h / 2;
-            System.out.println("x = " + x);
-            System.out.println("y = " + y);
             sb.draw(textureRegion, x, y, w / 2, h / 2, w, h, 1, 1, angle);
         }
 
         void dispose() {
             texture.dispose();
         }
+    }
+
+    public boolean isInvulnerable() {
+        return invulnerable;
     }
 
     @Override
