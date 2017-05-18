@@ -22,7 +22,6 @@ public class LossScreen implements Screen, GestureDetector.GestureListener {
     private WhaleGdxGame game;
     private Texture background;
     private Texture again_button;
-    private Rectangle again_buttonBounds;
     private BitmapFont font;
     private int score;
     private FitViewport gamePort;
@@ -31,15 +30,13 @@ public class LossScreen implements Screen, GestureDetector.GestureListener {
     public LossScreen(WhaleGdxGame game, int score) {
         this.game = game;
         this.score = score;
-        background = new Texture("menu_background.png");
-        again_button = new Texture("play_button.png");
+        background = new Texture("background.png");
+        again_button = new Texture("againButton.png");
         gameCam = new OrthographicCamera();
         gamePort = new FitViewport(WhaleGdxGame.V_WIDTH, WhaleGdxGame.V_HEIGHT, gameCam);
         gameCam.setToOrtho(false, gamePort.getWorldWidth(), gamePort.getWorldHeight());
-        gameCam.position.set(0, 0, 0);
-        again_buttonBounds = new Rectangle();
         font = new BitmapFont();
-        font.setColor(Color.BLACK);
+        font.setColor(Color.WHITE);
         Gdx.input.setInputProcessor(new GestureDetector(this));
     }
 
@@ -53,10 +50,12 @@ public class LossScreen implements Screen, GestureDetector.GestureListener {
         game.batch.setProjectionMatrix(gameCam.combined);
         game.batch.begin();
         game.batch.draw(background, 0, 0, WhaleGdxGame.V_WIDTH, WhaleGdxGame.V_HEIGHT);
-        game.batch.draw(again_button, gameCam.viewportWidth / 2 - again_button.getWidth() / 2, gameCam.viewportHeight / 2);
+        game.batch.draw(again_button,
+                gameCam.position.x - again_button.getWidth()/2,
+                gameCam.position.y - again_button.getHeight()/2);
         font.draw(game.batch, String.format("Your score: %03d", score),
                 gameCam.viewportWidth / 2 - again_button.getWidth() / 2,
-                gameCam.viewportHeight / 2 + 100);
+                gameCam.viewportHeight / 2 - again_button.getWidth() /2 - 100);
         game.batch.end();
     }
 
@@ -82,7 +81,9 @@ public class LossScreen implements Screen, GestureDetector.GestureListener {
 
     @Override
     public void dispose() {
-
+        background.dispose();
+        again_button.dispose();
+        font.dispose();
     }
 
     @Override
@@ -98,6 +99,7 @@ public class LossScreen implements Screen, GestureDetector.GestureListener {
 //        System.out.println(again_buttonBounds);
 //        if (again_buttonBounds.contains(x, y)) {
         game.setScreen(new PlayScreen(game));
+        this.dispose();
 //        }
         return true;
     }

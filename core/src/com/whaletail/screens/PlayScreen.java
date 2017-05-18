@@ -45,6 +45,7 @@ public class PlayScreen implements Screen {
     private PlayerSquare player;
     private Array<EnemySquare> enemySquares;
     private BitmapFont font;
+    private BitmapFont.Glyph glyph;
     private int maxSize;
     private EnemySquare last;
     private World world;
@@ -68,7 +69,7 @@ public class PlayScreen implements Screen {
         enemySquares = new Array<EnemySquare>();
         font = new BitmapFont();
         font.setColor(Color.WHITE);
-        font.getData().setScale(5f);
+        glyph = new BitmapFont.Glyph();
         maxSize = 16;
         background = new Texture("background.png");
         b2dr = new Box2DDebugRenderer();

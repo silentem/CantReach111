@@ -2,8 +2,6 @@ package com.whaletail.sprites;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -23,39 +21,28 @@ import static com.whaletail.Constants.PPM;
 public class EnemySquare extends Actor {
 
     private static final int ENEMY_WIDTH = 16;
-    public static final int ENEMY_HEIGHT = 16;
-    public static final int GAP = 6;
+    private static final int ENEMY_HEIGHT = 16;
+    private static final int GAP = 6;
     public static final int ENEMY_SPACE = GAP + 64 + GAP;
 
-    private Texture texture1;
-    private Texture texture2;
-    private Texture texture3;
-    private Texture texture4;
-    private Sprite sprite;
+    private View view;
     private int speed;
     private boolean rightLeft;
     private float maxWidth;
-    private int enemyWidth;
     private World world;
     private Body body;
-    private int height;
-    private int heightMultipl;
 
     public EnemySquare(float y, int speed, float maxWidth, World world) {
         this.speed = speed;
         this.maxWidth = maxWidth;
         this.world = world;
-        heightMultipl = MathUtils.random(3) + 1;
-        height = ENEMY_HEIGHT * heightMultipl;
-        texture1 = new Texture("enemy-1.png");
-        texture2 = new Texture("enemy-2.png");
-        texture3 = new Texture("enemy-3.png");
-        texture4 = new Texture("enemy-4.png");
-        sprite = new Sprite();
-        setTextureBySpeed();
-        enemyWidth = MathUtils.random(12) + 5;
+        createNew(y, speed);
+    }
+
+    public void createNew(float y, int speed) {
         rightLeft = MathUtils.randomBoolean();
-        body = createBody();
+        createView(speed);
+        createBody();
         if (rightLeft) {
             setPosition(0 - getWidth() - MathUtils.random(200), y);
             body.setLinearVelocity(speed, body.getLinearVelocity().y);
@@ -63,52 +50,46 @@ public class EnemySquare extends Actor {
             setPosition(maxWidth + MathUtils.random(200), y);
             body.setLinearVelocity(-speed, body.getLinearVelocity().y);
         }
-
     }
 
-    private void setTextureBySpeed(){
+    private void createView(int speed) {
+        int vCount = MathUtils.random(3) + 1;
+        int hCount = MathUtils.random(12) + 5;
+        Texture pattern;
         if (MathUtils.random(10) == 9) {
-            sprite.setTexture(texture4);
+            pattern = new Texture("enemy-4.png");
         } else if (speed <= 5) {
-            sprite.setTexture(texture1);
+            pattern = new Texture("enemy-1.png");
         } else if (speed >= 9) {
-            sprite.setTexture(texture3);
+            pattern = new Texture("enemy-2.png");
         } else {
-            sprite.setTexture(texture2);
+            pattern = new Texture("enemy-3.png");
         }
+        view = new View(pattern, hCount, vCount);
     }
 
-    private Body createBody() {
-        BodyDef def = new BodyDef();
-        def.type = BodyDef.BodyType.KinematicBody;
-        Body body = world.createBody(def);
+    private void createBody() {
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(getWidth() / 2 / PPM, getHeight() / 2 / PPM);
+        BodyDef def = new BodyDef();
+        def.type = BodyDef.BodyType.KinematicBody;
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.density = 1f;
+        if (body == null) {
+            body = world.createBody(def);
+        } else {
+            body.destroyFixture(body.getFixtureList().get(0));
+        }
         body.createFixture(fixtureDef);
         shape.dispose();
-        return body;
-    }
-
-    public int getSpeed() {
-        return speed;
     }
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        render(batch);
-    }
-
-    public void render(Batch sb) {
         float x = body.getPosition().x * PPM - getWidth() / 2;
         float y = body.getPosition().y * PPM - getHeight() / 2;
-        for (float i = x; i < x + (ENEMY_WIDTH * enemyWidth); i += ENEMY_WIDTH) {
-            for (float j = y; j < y + height; j += ENEMY_HEIGHT) {
-                sb.draw(sprite.getTexture(), i, j);
-            }
-        }
+        view.draw(batch, x, y);
     }
 
     public void reset() {
@@ -121,30 +102,29 @@ public class EnemySquare extends Actor {
 
     public void stop() {
         float delay = 0.5f;
-
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
                 body.setLinearVelocity(0, 0);
             }
         }, delay);
+    }
 
+    public void dispose() {
+        view.dispose();
     }
 
     public boolean isRightLeft() {
         return rightLeft;
     }
 
-    public void dispose() {
-        texture1.dispose();
-        texture2.dispose();
-        texture3.dispose();
-        texture4.dispose();
-    }
-
     @Override
     public void setPosition(float x, float y) {
         body.setTransform(x / PPM, y / PPM, 0);
+    }
+
+    public int getSpeed() {
+        return speed;
     }
 
     @Override
@@ -169,35 +149,36 @@ public class EnemySquare extends Actor {
 
     @Override
     public float getWidth() {
-        return ENEMY_WIDTH * enemyWidth;
+        return ENEMY_WIDTH * view.hCount;
     }
+
 
     @Override
     public float getHeight() {
-        return height;
+        return ENEMY_HEIGHT * view.vCount;
     }
 
+    public static class View {
+        private Texture texturePattern;
+        private int hCount;
+        private int vCount;
 
-    public void createNew(float y, int speed) {
-        this.speed = speed;
-        rightLeft = MathUtils.randomBoolean();
-        enemyWidth = MathUtils.random(10) + 3;
+        public View(Texture texturePattern, int hCount, int vCount) {
+            this.texturePattern = texturePattern;
+            this.hCount = hCount;
+            this.vCount = vCount;
+        }
 
-        setTextureBySpeed();
-        heightMultipl = MathUtils.random(3) + 1;
-        height = ENEMY_HEIGHT * heightMultipl;
-        body.destroyFixture(body.getFixtureList().get(0));
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(getWidth() / 2 / PPM, getHeight() / 2 / PPM);
-        FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = shape;
-        body.createFixture(fixtureDef);
-        if (rightLeft) {
-            setPosition(0 - getWidth() - MathUtils.random(200), y);
-            body.setLinearVelocity(speed, body.getLinearVelocity().y);
-        } else {
-            setPosition(maxWidth + MathUtils.random(200), y);
-            body.setLinearVelocity(-speed, body.getLinearVelocity().y);
+        public void draw(Batch batch, float x, float y) {
+            for (float i = x; i < x + ENEMY_WIDTH * hCount; i += ENEMY_WIDTH) {
+                for (float j = y; j < y + ENEMY_HEIGHT * vCount; j += ENEMY_HEIGHT) {
+                    batch.draw(texturePattern, i, j);
+                }
+            }
+        }
+
+        public void dispose() {
+            texturePattern.dispose();
         }
     }
 }
