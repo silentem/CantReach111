@@ -10,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Timer;
+import com.whaletail.WhaleGdxGame;
 
 import static com.whaletail.Constants.PPM;
 
@@ -29,13 +30,15 @@ public class EnemySquare extends Actor {
     private int speed;
     private boolean rightLeft;
     private float maxWidth;
+    private WhaleGdxGame game;
     private World world;
     private Body body;
 
-    public EnemySquare(float y, int speed, float maxWidth, World world) {
+    public EnemySquare(float y, int speed, float maxWidth, WhaleGdxGame game) {
         this.speed = speed;
         this.maxWidth = maxWidth;
-        this.world = world;
+        this.game = game;
+        world = game.world;
         createNew(y, speed);
     }
 
@@ -57,13 +60,13 @@ public class EnemySquare extends Actor {
         int hCount = MathUtils.random(12) + 5;
         Texture pattern;
         if (MathUtils.random(10) == 9) {
-            pattern = new Texture("enemy-4.png");
+            pattern = game.asset.get("enemy-4.png", Texture.class);
         } else if (speed <= 5) {
-            pattern = new Texture("enemy-1.png");
+            pattern = game.asset.get("enemy-1.png", Texture.class);
         } else if (speed >= 9) {
-            pattern = new Texture("enemy-2.png");
+            pattern = game.asset.get("enemy-2.png", Texture.class);
         } else {
-            pattern = new Texture("enemy-3.png");
+            pattern = game.asset.get("enemy-3.png", Texture.class);
         }
         view = new View(pattern, hCount, vCount);
     }
@@ -101,7 +104,7 @@ public class EnemySquare extends Actor {
     }
 
     public void stop() {
-        float delay = 0.5f;
+        float delay = .5f;
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
@@ -175,6 +178,14 @@ public class EnemySquare extends Actor {
                     batch.draw(texturePattern, i, j);
                 }
             }
+        }
+
+        public float getWidth() {
+            return texturePattern.getWidth() * hCount;
+        }
+
+        public float getHeight() {
+            return texturePattern.getHeight() * vCount;
         }
 
         public void dispose() {

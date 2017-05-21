@@ -21,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Array;
+import com.whaletail.WhaleGdxGame;
 
 import static com.whaletail.Constants.PPM;
 import static com.whaletail.sprites.EnemySquare.ENEMY_SPACE;
@@ -38,6 +39,7 @@ public class PlayerSquare extends Actor {
 
     private static final int PLAYER_HEIGHT = 32;
     public State state;
+    private WhaleGdxGame game;
     private boolean overlaps;
     private Sprite sprite;
     private Texture texture;
@@ -57,13 +59,14 @@ public class PlayerSquare extends Actor {
     private OrthographicCamera camera;
     private Vector2 jumpPos;
 
-    public PlayerSquare(World world, OrthographicCamera camera, float x, float y) {
-        this.world = world;
+    public PlayerSquare(WhaleGdxGame game, OrthographicCamera camera, float x, float y) {
+        this.game = game;
         this.camera = camera;
-        texture = new Texture("player.png");
+        world = game.world;
+        texture = game.asset.get("player.png", Texture.class);
         sprite = new Sprite(texture);
-        teleAnimTexture = new Texture("animation.png");
-        moveAnimTexture = new Texture("move_animation.png");
+        teleAnimTexture = game.asset.get("animation.png", Texture.class);
+        moveAnimTexture = game.asset.get("move_animation.png", Texture.class);
         state = State.STANDING;
         invulnerable = false;
         animated = false;
@@ -154,7 +157,7 @@ public class PlayerSquare extends Actor {
         System.out.println("moving");
         if (state == State.STANDING) {
             direction.y = direction.y + ENEMY_SPACE;
-            addAction(Actions.moveTo(getX(), direction.y, 0.1f));
+            addAction(Actions.moveTo(getX(), direction.y, .1f));
             animated = true;
             state = State.MOVING;
         }
@@ -171,9 +174,6 @@ public class PlayerSquare extends Actor {
                 invulnerable = true;
                 jump();
                 animated = true;
-//                if (camera.position.y < direction.y + ENEMY_SPACE * 2) {
-//                    camera.position.y += 15;
-//                }
                 batch.draw(tAnimation.getKeyFrame(time), jumpPos.x - getWidth() / 2 - 16, jumpPos.y - getHeight() / 2 - 16);
             } else if (state == State.TELEPORTING && tAnimation.isAnimationFinished(time)) {
                 invulnerable = false;
@@ -209,7 +209,6 @@ public class PlayerSquare extends Actor {
         Rectangle player = new Rectangle(body.getPosition().x*PPM - getWidth() / 2, body.getPosition().y*PPM - getHeight() / 2, getWidth(), getHeight());
         if (player.overlaps(enemy)) {
             overlaps = true;
-            System.out.println("Dead");
             if (isInvulnerable()){
                 return false;
             } else return true;
@@ -226,7 +225,7 @@ public class PlayerSquare extends Actor {
         private TextureRegion textureRegion;
 
         Shards(int i, int j, float x, float y) {
-            texture = new Texture("player.png");
+            texture = game.asset.get("player.png", Texture.class);
             textureRegion = new TextureRegion(texture);
             BodyDef def = new BodyDef();
             def.type = BodyDef.BodyType.DynamicBody;
@@ -239,8 +238,8 @@ public class PlayerSquare extends Actor {
             shape.setAsBox(w / 2 / PPM, h / 2 / PPM);
             FixtureDef fixtureDef = new FixtureDef();
             fixtureDef.shape = shape;
-            fixtureDef.density = 0.8f;
-            fixtureDef.friction = 0.1f;
+            fixtureDef.density = .8f;
+            fixtureDef.friction = .1f;
             body.createFixture(fixtureDef);
             body.setUserData(texture);
             shape.dispose();
@@ -278,6 +277,7 @@ public class PlayerSquare extends Actor {
 
     public void dispose() {
         texture.dispose();
+        sprite.getTexture().dispose();
         teleAnimTexture.dispose();
         for (Shards shard : shards) {
             shard.dispose();
