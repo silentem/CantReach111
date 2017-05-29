@@ -16,12 +16,18 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.moveTo;
 public class ViewActor extends Actor {
 
     protected Vector2 direction;
-    private EnemySquare.View view;
+    protected EnemySquare.View view;
 
     public ViewActor(Vector2 position,
               Vector2 direction,
               EnemySquare.View view) {
         this.direction = direction;
+        this.view = view;
+        setPosition(position.x, position.y);
+    }
+
+    public ViewActor(Vector2 position,
+              EnemySquare.View view) {
         this.view = view;
         setPosition(position.x, position.y);
     }

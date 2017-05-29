@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.whaletail.Constants;
 
 /**
@@ -19,7 +20,7 @@ public class Text extends Actor {
     private GlyphLayout glyphLayout;
     private float x;
     private float y;
-    private OrthographicCamera camera;
+    private Stage stage;
 
     public Text(Object text, BitmapFont font) {
         this.text = text.toString();
@@ -29,9 +30,9 @@ public class Text extends Actor {
         glyphLayout = new GlyphLayout(font, text.toString());
     }
 
-    public Text(Object text, BitmapFont font, OrthographicCamera camera) {
+    public Text(Object text, BitmapFont font, Stage stage) {
         this.text = text.toString();
-        this.camera = camera;
+        this.stage = stage;
         long start = System.currentTimeMillis();
         this.font = font;
         System.out.println(System.currentTimeMillis() - start);
@@ -40,10 +41,11 @@ public class Text extends Actor {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        if (camera != null) {
+        if (stage != null) {
             font.draw(batch, text.toString(),
-                    camera.position.x + camera.viewportWidth / 2 - getWidth() - 10,
-                    camera.position.y + camera.viewportHeight / 2 - 10);
+                    stage.getWidth()  - getWidth() - 10,
+                    stage.getCamera().position.y + stage.getHeight()/2 - 10);
+
         } else {
             font.draw(batch, text.toString(), x, y);
         }

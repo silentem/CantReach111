@@ -83,6 +83,9 @@ public class LoadingScreen implements Screen {
 
     private void queueAssets() {
         game.asset.load("background.png", Texture.class);
+//        game.asset.load("sign.png", Texture.class);
+        game.asset.load("swipe_icon.png", Texture.class);
+        game.asset.load("tap_icon.png", Texture.class);
         game.asset.load("foreground.png", Texture.class);
         game.asset.load("playButton.png", Texture.class);
         game.asset.load("enemy-1.png", Texture.class);

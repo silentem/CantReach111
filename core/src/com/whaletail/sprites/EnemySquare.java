@@ -21,8 +21,8 @@ import static com.whaletail.Constants.PPM;
 
 public class EnemySquare extends Actor {
 
-    private static final int ENEMY_WIDTH = 16;
-    private static final int ENEMY_HEIGHT = 16;
+    public static final int ENEMY_WIDTH = 16;
+    public static final int ENEMY_HEIGHT = 16;
     private static final int GAP = 6;
     public static final int ENEMY_SPACE = GAP + 64 + GAP;
 
@@ -178,6 +178,10 @@ public class EnemySquare extends Actor {
                     batch.draw(texturePattern, i, j);
                 }
             }
+        }
+
+        public void draw(Batch batch, float x, float y, int width, int height) {
+            batch.draw(texturePattern, x, y, width, height);
         }
 
         public float getWidth() {
