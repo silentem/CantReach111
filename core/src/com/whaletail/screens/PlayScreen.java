@@ -178,7 +178,7 @@ public class PlayScreen implements Screen {
                     game.score.add(2);
                     font.setText(game.score);
                     System.out.println("Score = " + game.score);
-                    player.state = PlayerSquare.State.TELEPORTING;
+                    player.jump();
                 }
             }
 
@@ -280,7 +280,7 @@ public class PlayScreen implements Screen {
             stageTutorial.act(delta);
             stageTutorial.draw();
         }
-//        b2dr.render(game.world, gameCam.combined.scl(PPM));
+        b2dr.render(game.world, gameCam.combined.scl(PPM));
 
     }
 

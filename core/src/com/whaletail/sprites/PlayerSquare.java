@@ -1,10 +1,10 @@
 package com.whaletail.sprites;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -15,7 +15,6 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -26,9 +25,7 @@ import java.util.Random;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
 import static com.whaletail.Constants.PPM;
-import static com.whaletail.sprites.EnemySquare.ENEMY_HEIGHT;
 import static com.whaletail.sprites.EnemySquare.ENEMY_SPACE;
-import static com.whaletail.sprites.EnemySquare.ENEMY_WIDTH;
 
 /**
  * @author Whaletail
@@ -42,15 +39,11 @@ public class PlayerSquare extends Actor {
 
     private static final int PLAYER_WIDTH = 32;
 
-    public static final int E_G = 32;
-    public static final float D = .25f;
-    public static final float DL = 0f;
-
     private static final int PLAYER_HEIGHT = 32;
     public State state;
     private WhaleGdxGame game;
     private boolean overlaps;
-    private View sprite;
+    private View view;
     private Texture texture;
     private Texture teleAnimTexture;
     private Texture moveAnimTexture;
@@ -73,7 +66,7 @@ public class PlayerSquare extends Actor {
         this.camera = camera;
         world = game.world;
         texture = game.asset.get("player.png", Texture.class);
-        sprite = new View();
+        view = new View();
         teleAnimTexture = game.asset.get("animation.png", Texture.class);
         moveAnimTexture = game.asset.get("move_animation.png", Texture.class);
         state = State.STANDING;
@@ -119,27 +112,6 @@ public class PlayerSquare extends Actor {
         return body;
     }
 
-//    public void stopTeleAnim() {
-//        rt.remove();
-//    }
-//
-//    public void startTeleAnim() {
-//
-//        rt = new Image(sprite.getTexturePattern());
-//        Vector2 rtp = new Vector2(sprite.x, sprite.y);
-//
-//        System.out.println(rt.getWidth() / 2 + " " + rt.getHeight() / 2);
-//        setPosition(getOriginX() + 8, getOriginY() + 8);
-//        setOrigin(rt.getWidth() / 2, rt.getHeight() / 2);
-//        setScale(2f, 2f);
-//        setupAnimation(rt);
-//
-//        Stage stage = game.playScreen.getStage();
-//        stage.addActor(rt);
-//        rt.setZIndex(1);
-//
-//    }
-
     private void startTeleAnim() {
         addAction(
                 parallel(
@@ -167,14 +139,10 @@ public class PlayerSquare extends Actor {
         }
     }
 
-    public Vector2 getDestination() {
-        return destination;
-    }
-
     @Override
     protected void positionChanged() {
         if (!isDead()) {
-            sprite.setPosition(getX() - getWidth() / 2, getY() - getHeight() / 2);
+//            view.setPosition(getX() - getWidth() / 2, getY() - getHeight() / 2);
             setPosition(getX(), getY());
             if (getY() > camera.viewportHeight / 2 - 128 && !isDead() && (state == State.MOVING || state == State.TELEPORTING)) {
                 camera.position.y = getY() + 128;
@@ -219,11 +187,7 @@ public class PlayerSquare extends Actor {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         if (!isDead() && !overlaps) {
-            if (state == State.STANDING || state == State.MOVING) {
-                sprite.draw(batch, parentAlpha);
-            } else if (state == State.TELEPORTING) {
-                jump();
-            }
+            view.draw(batch, parentAlpha);
         } else {
             for (Shard shard : shards) {
                 shard.render(batch);
@@ -240,7 +204,7 @@ public class PlayerSquare extends Actor {
         if (!animated) {
             invulnerable = true;
             animated = true;
-            sprite.switchTexture();
+            view.switchTexture();
             state = State.TELEPORTING;
             jumpPos.set(getX(), getY());
             destination.y += ENEMY_SPACE * 2;
@@ -261,6 +225,49 @@ public class PlayerSquare extends Actor {
         return false;
     }
 
+    private class View{
+
+        private Sprite sprite;
+        private int tNum;
+        private Random r;
+
+        private View() {
+            sprite = new Sprite();
+            r = new Random();
+            switchTexture();
+        }
+
+        public void draw(Batch batch, float parentAlpha) {
+            sprite.draw(batch);
+        }
+
+        public void switchTexture() {
+            int tNext = tNum;
+            while (tNext == tNum) {
+                tNum = r.nextInt(4);
+            }
+            switch (tNum) {
+                case 0:
+                    sprite.setTexture(game.asset.get("enemy-1.png", Texture.class));
+                    break;
+                case 1:
+                    sprite.setTexture(game.asset.get("enemy-2.png", Texture.class));
+                    break;
+                case 2:
+                    sprite.setTexture(game.asset.get("enemy-3.png", Texture.class));
+                    break;
+                case 3:
+                    sprite.setTexture(game.asset.get("enemy-4.png", Texture.class));
+                    break;
+            }
+        }
+
+        public Texture getTexturePattern() {
+            return sprite.getTexture();
+        }
+
+    }
+
     private class Shard {
         private Body body;
         private float w;
@@ -270,7 +277,7 @@ public class PlayerSquare extends Actor {
 
 
         Shard(int i, int j, float x, float y) {
-            texture = sprite.getTexturePattern();
+            texture = view.getTexturePattern();
             textureRegion = new TextureRegion(texture);
             BodyDef def = new BodyDef();
             def.type = BodyDef.BodyType.DynamicBody;
@@ -347,18 +354,21 @@ public class PlayerSquare extends Actor {
     public void setPosition(float x, float y) {
         super.setPosition(x, y);
         body.setTransform(x / PPM, y / PPM, 0);
+//        view.setPosition(x, y);
     }
 
     @Override
     public void setX(float x) {
         super.setX(x);
         body.setTransform(x / PPM, body.getPosition().y, 0);
+//        view.setX(x);
     }
 
     @Override
     public void setY(float y) {
         super.setY(y);
         body.setTransform(body.getPosition().x, y / PPM, 0);
+//        view.setY(y);
     }
 
     @Override
@@ -371,71 +381,4 @@ public class PlayerSquare extends Actor {
         return PLAYER_HEIGHT;
     }
 
-    public class View extends Actor{
-        private TextureRegion texturePattern;
-        private int hCount;
-        private int vCount;
-        private Random r;
-        private float x;
-        private float y;
-        private int tNum;
-
-        public View() {
-            r = new Random();
-            hCount = 2;
-            vCount = 2;
-            switchTexture();
-        }
-
-        @Override
-        public void draw(Batch batch, float parentAlpha) {
-            for (float i = x; i < x + ENEMY_WIDTH * hCount; i += ENEMY_WIDTH) {
-                for (float j = y; j < y + ENEMY_HEIGHT * vCount; j += ENEMY_HEIGHT) {
-                    batch.draw(texturePattern, i, j, getOriginX(), getOriginY(), getWidth(), getHeight(), getScaleX(), getScaleY(), getRotation());
-                }
-            }
-        }
-
-        public void switchTexture() {
-            int tNext = tNum;
-            while (tNext == tNum) {
-                tNum = r.nextInt(4);
-            }
-            switch (tNum) {
-                case 0:
-                    texturePattern = new TextureRegion(game.asset.get("enemy-1.png", Texture.class));
-                    break;
-                case 1:
-                    texturePattern = new TextureRegion(game.asset.get("enemy-2.png", Texture.class));
-                    break;
-                case 2:
-                    texturePattern = new TextureRegion(game.asset.get("enemy-3.png", Texture.class));
-                    break;
-                case 3:
-                    texturePattern = new TextureRegion(game.asset.get("enemy-4.png", Texture.class));
-                    break;
-            }
-        }
-
-        public void setPosition(float x, float y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        public Texture getTexturePattern() {
-            return texturePattern.getTexture();
-        }
-
-        public float getWidth() {
-            return texturePattern.getTexture().getWidth() * hCount;
-        }
-
-        public float getHeight() {
-            return texturePattern.getTexture().getHeight() * vCount;
-        }
-
-        public void dispose() {
-            texturePattern.getTexture().dispose();
-        }
-    }
 }
