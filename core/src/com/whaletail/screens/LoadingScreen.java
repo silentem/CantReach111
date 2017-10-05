@@ -83,7 +83,8 @@ public class LoadingScreen implements Screen {
 
     private void queueAssets() {
         game.asset.load("background.png", Texture.class);
-//        game.asset.load("sign.png", Texture.class);
+        game.asset.load("musicButton.png", Texture.class);
+        game.asset.load("noMusicButton.png", Texture.class);
         game.asset.load("swipe_icon.png", Texture.class);
         game.asset.load("tap_icon.png", Texture.class);
         game.asset.load("foreground.png", Texture.class);
@@ -92,12 +93,12 @@ public class LoadingScreen implements Screen {
         game.asset.load("enemy-2.png", Texture.class);
         game.asset.load("enemy-3.png", Texture.class);
         game.asset.load("enemy-4.png", Texture.class);
-        game.asset.load("cancelButton.png", Texture.class);
+        game.asset.load("player-1.png", Texture.class);
+        game.asset.load("player-2.png", Texture.class);
+        game.asset.load("player-3.png", Texture.class);
+        game.asset.load("player-4.png", Texture.class);
         game.asset.load("againButton.png", Texture.class);
         game.asset.load("homeButton.png", Texture.class);
-        game.asset.load("player.png", Texture.class);
-        game.asset.load("animation.png", Texture.class);
-        game.asset.load("move_animation.png", Texture.class);
     }
 
 }

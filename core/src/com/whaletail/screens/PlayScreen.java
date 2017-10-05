@@ -19,6 +19,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
@@ -50,6 +51,7 @@ public class PlayScreen implements Screen {
     private static final float GRAVITY = -9.8f;
     public static final String TAP_TUT = "Tap to move \none forward";
     public static final String SWIPE_TUT = "Swipe to \njump over one";
+    public static final String CAN_REACH_TUT = "Can you \nreach 111?";
 
     private WhaleGdxGame game;
     private OrthographicCamera gameCam;
@@ -67,7 +69,6 @@ public class PlayScreen implements Screen {
     private boolean shouldJump;
 
     private boolean debug;
-
 
     public PlayScreen(WhaleGdxGame game) {
         this.game = game;
@@ -88,14 +89,19 @@ public class PlayScreen implements Screen {
             stageHUD.addAction(alpha(.5f));
             final Image tapImage = new Image(game.asset.get("tap_icon.png", Texture.class));
             final Image swipeImage = new Image(game.asset.get("swipe_icon.png", Texture.class));
-            final Text tapText = new Text(TAP_TUT, game.font30);
-            final Text swipeText = new Text(SWIPE_TUT, game.font30);
+            Label.LabelStyle ls = new Label.LabelStyle();
+            ls.font = game.font30;
+            final Label tapText = new Label(TAP_TUT, ls);
+            final Label swipeText = new Label(SWIPE_TUT, ls);
+            final Label canReachText = new Label(CAN_REACH_TUT, ls);
             tapImage.setPosition(stage.getWidth() / 2 - tapImage.getWidth() / 2, stage.getHeight() / 2 - tapImage.getHeight() / 2);
             tapText.setX(stage.getWidth() / 2 - tapText.getWidth() / 2);
-            tapText.setY(0);
+            tapText.setY(tapImage.getY()- tapText.getHeight() - 50);
             swipeImage.setPosition(stage.getWidth() / 2 - swipeImage.getWidth() / 2, stage.getHeight() / 2 - swipeImage.getHeight() / 2);
-            tapText.setX(stage.getWidth() / 2 - swipeText.getWidth() / 2);
-            tapText.setY(0);
+            swipeText.setX(stage.getWidth() / 2 - swipeText.getWidth() / 2);
+            swipeText.setY(swipeImage.getY()- swipeText.getHeight() - 50);
+            canReachText.setPosition(stage.getWidth() / 2 - canReachText.getWidth() / 2,
+                    stage.getHeight() / 2 - canReachText.getHeight() / 2);
             stageTutorial.addActor(tapImage);
             stageTutorial.addActor(tapText);
 
@@ -107,17 +113,24 @@ public class PlayScreen implements Screen {
                     this.count++;
                     if (this.count == 1) {
                         System.out.println("1 tap");
+                        System.out.println(count);
                         tapImage.remove();
                         tapText.remove();
                         stageTutorial.addActor(swipeImage);
                         stageTutorial.addActor(swipeText);
-                        this.count++;
-                    } else if (this.count >= 2) {
+                    } else if (this.count == 2) {
                         System.out.println("2 tap");
+                        System.out.println(count);
                         swipeImage.remove();
                         swipeText.remove();
+                        stageTutorial.addActor(canReachText);
+                    } else if (this.count == 3) {
+                        System.out.println(count);
+                        canReachText.remove();
                         stageTutorial.dispose();
                         stageTutorial = null;
+                        stage.addAction(alpha(1f));
+                        stageHUD.addAction(alpha(1f));
                         Gdx.input.setInputProcessor(stage);
                         this.count++;
                     }
@@ -165,6 +178,7 @@ public class PlayScreen implements Screen {
             public void tap(InputEvent event, float x, float y, int count, int button) {
                 if (!player.animated && !player.isDead()) {
                     game.score.add(1);
+                    win();
                     font.setText(game.score);
                     System.out.println("Score = " + game.score);
                     player.move();
@@ -174,7 +188,7 @@ public class PlayScreen implements Screen {
 
             @Override
             public void fling(InputEvent event, float velocityX, float velocityY, int button) {
-                if (!player.animated && shouldJump) {
+                if (!player.animated && shouldJump && !player.isDead()) {
                     game.score.add(2);
                     font.setText(game.score);
                     System.out.println("Score = " + game.score);
@@ -217,21 +231,21 @@ public class PlayScreen implements Screen {
         int speed = 0;
         if (0 <= game.score.getScore() && game.score.getScore() <= 30) {
             if (prev < 5) {
-                return MathUtils.random(5) + 4;
+                return MathUtils.random(3) + 4;
+            } else {
+                return MathUtils.random(2) + 2;
+            }
+        } else if (30 < game.score.getScore() && game.score.getScore() <= 60) {
+            if (prev < 7) {
+                return MathUtils.random(2) + 5;
             } else {
                 return MathUtils.random(3) + 3;
             }
-        } else if (30 < game.score.getScore() && game.score.getScore() <= 60) {
-            if (prev < 5) {
-                return MathUtils.random(8) + 5;
-            } else {
-                return MathUtils.random(4) + 3;
-            }
         } else if (60 < game.score.getScore()) {
-            if (prev < 5) {
-                return MathUtils.random(8) + 7;
+            if (prev < 8) {
+                return MathUtils.random(2) + 6;
             } else {
-                return MathUtils.random(5) + 4;
+                return MathUtils.random(3) + 4;
             }
         }
         return speed;
@@ -264,9 +278,6 @@ public class PlayScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         update(delta);
-        player.update();
-
-        player.render();
         stage.getViewport().apply();
         stage.act(delta);
         stage.draw();
@@ -280,7 +291,7 @@ public class PlayScreen implements Screen {
             stageTutorial.act(delta);
             stageTutorial.draw();
         }
-        b2dr.render(game.world, gameCam.combined.scl(PPM));
+//        b2dr.render(game.world, gameCam.combined.scl(PPM));
 
     }
 
@@ -291,6 +302,10 @@ public class PlayScreen implements Screen {
     private void update(float delta) {
         game.world.step(1 / 60f, 6, 2);
 
+
+        if (game.score.getScore() == 111) {
+            win();
+        }
         for (EnemySquare enemySquare : enemySquares) {
             if (enemySquare.getY() < gameCam.position.y - gameCam.viewportHeight / 2) {
                 enemySquare.createNew(last.getY() + last.getHeight() + ENEMY_SPACE - last.getHeight(), getRandomSpeed(last.getSpeed()));
@@ -310,6 +325,29 @@ public class PlayScreen implements Screen {
             }
         }
 
+    }
+
+    private void win() {
+        game.world.setGravity(new Vector2(0, GRAVITY));
+        player.setInvulnerable(true);
+        float delay = 4f;
+
+        game.prefs.putBoolean("win", true);
+        game.prefs.flush();
+
+        player.win();
+        for (EnemySquare enemySquare : enemySquares) {
+            enemySquare.win();
+        }
+
+        Timer.schedule(new Timer.Task() {
+
+            @Override
+            public void run() {
+                game.setScreen(game.lossScreen);
+            }
+
+        }, delay);
     }
 
     @Override

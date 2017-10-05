@@ -9,9 +9,11 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Timer;
 import com.whaletail.WhaleGdxGame;
 
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
 import static com.whaletail.Constants.PPM;
 
 /**
@@ -61,9 +63,9 @@ public class EnemySquare extends Actor {
         Texture pattern;
         if (MathUtils.random(10) == 9) {
             pattern = game.asset.get("enemy-4.png", Texture.class);
-        } else if (speed <= 5) {
+        } else if (speed <= 5 && speed <=7) {
             pattern = game.asset.get("enemy-1.png", Texture.class);
-        } else if (speed >= 9) {
+        } else if (speed >= 7) {
             pattern = game.asset.get("enemy-2.png", Texture.class);
         } else {
             pattern = game.asset.get("enemy-3.png", Texture.class);
@@ -159,6 +161,11 @@ public class EnemySquare extends Actor {
     @Override
     public float getHeight() {
         return ENEMY_HEIGHT * view.vCount;
+    }
+
+    public void win() {
+        stop();
+        addAction(forever(Actions.rotateTo(360, .5f)));
     }
 
     public static class View {

@@ -35,23 +35,17 @@ import static com.whaletail.sprites.EnemySquare.ENEMY_SPACE;
 public class PlayerSquare extends Actor {
 
 
-    public enum State {STANDING, TELEPORTING, MOVING;}
+    private enum State {STANDING, TELEPORTING, MOVING;}
 
     private static final int PLAYER_WIDTH = 32;
 
     private static final int PLAYER_HEIGHT = 32;
-    public State state;
+
+    private State state;
     private WhaleGdxGame game;
     private boolean overlaps;
     private View view;
-    private Texture texture;
-    private Texture teleAnimTexture;
-    private Texture moveAnimTexture;
-    private Array<TextureRegion> animFrames;
-    private Array<TextureRegion> moveAnimFrames;
-    private Animation<TextureRegion> tAnimation;
     private Array<Shard> shards;
-    private Image rt;
     private boolean invulnerable;
     public boolean animated;
     private World world;
@@ -65,30 +59,13 @@ public class PlayerSquare extends Actor {
         this.game = game;
         this.camera = camera;
         world = game.world;
-        texture = game.asset.get("player.png", Texture.class);
         view = new View();
-        teleAnimTexture = game.asset.get("animation.png", Texture.class);
-        moveAnimTexture = game.asset.get("move_animation.png", Texture.class);
         state = State.STANDING;
         invulnerable = false;
         animated = false;
         dead = false;
         jumpPos = new Vector2();
-        animFrames = new Array<TextureRegion>();
-        moveAnimFrames = new Array<TextureRegion>();
         shards = new Array<Shard>();
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                animFrames.add(new TextureRegion(teleAnimTexture, j * 64, i * 64, 64, 64));
-            }
-        }
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < 4; j++) {
-                if (i == 1 && j == 3) continue;
-                moveAnimFrames.add(new TextureRegion(moveAnimTexture, j * 32, i * 64, 32, 64));
-            }
-        }
-        tAnimation = new Animation<TextureRegion>(1f / 45f, animFrames);
         body = createBody();
         setX(x);
         setY(y);
@@ -107,42 +84,40 @@ public class PlayerSquare extends Actor {
         fixtureDef.shape = shape;
         fixtureDef.density = 1f;
         body.createFixture(fixtureDef);
-        body.setUserData(texture);
         shape.dispose();
         return body;
     }
 
     private void startTeleAnim() {
-        addAction(
-                parallel(
-                        sequence(
-                                scaleTo(0f, 0f, .05f),
-                                moveTo(getX(), destination.y, .1f),
-                                scaleTo(2f, 2f, .05f),
-                                run(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        invulnerable = false;
-                                        animated = false;
-                                        state = State.STANDING;
-                                    }
-                                })
-                        )
+        view.getImage().setOrigin(view.getWidth() / 2, view.getHeight() / 2);
+        view.getImage().addAction(
+                sequence(
+                        scaleTo(0f, 0f, .05f),
+                        run(new Runnable() {
+                            @Override
+                            public void run() {
+                                addAction(moveTo(getX(), destination.y, .1f));
+                            }
+                        }),
+                        moveTo(getX() - view.getWidth() / 2, destination.y - view.getHeight() / 2, .1f),
+                        scaleTo(1f, 1f, .05f),
+                        run(new Runnable() {
+                            @Override
+                            public void run() {
+                                invulnerable = false;
+                                animated = false;
+                                state = State.STANDING;
+                                view.resetImage();
+                            }
+                        })
                 )
         );
-    }
-
-    public void update() {
-        if (super.getY() >= destination.y && state == State.MOVING) {
-            animated = false;
-            state = State.STANDING;
-        }
     }
 
     @Override
     protected void positionChanged() {
         if (!isDead()) {
-//            view.setPosition(getX() - getWidth() / 2, getY() - getHeight() / 2);
+            view.getImage().setPosition(getOriginX(), getOriginY());
             setPosition(getX(), getY());
             if (getY() > camera.viewportHeight / 2 - 128 && !isDead() && (state == State.MOVING || state == State.TELEPORTING)) {
                 camera.position.y = getY() + 128;
@@ -152,9 +127,29 @@ public class PlayerSquare extends Actor {
         super.positionChanged();
     }
 
+
     @Override
     public void act(float delta) {
         super.act(delta);
+        if (super.getY() >= destination.y && state == State.MOVING) {
+            animated = false;
+            state = State.STANDING;
+        }
+        view.getImage().act(delta);
+    }
+
+    public void win() {
+        invulnerable = true;
+        float x = body.getPosition().x * PPM;
+        float y = body.getPosition().y * PPM;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                shards.add(new Shard(i, j, x, y));
+            }
+        }
+        for (Shard shard : shards) {
+            shard.getBody().setAngularVelocity(25);
+        }
     }
 
     public void lose() {
@@ -187,7 +182,7 @@ public class PlayerSquare extends Actor {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         if (!isDead() && !overlaps) {
-            view.draw(batch, parentAlpha);
+            view.getImage().draw(batch, parentAlpha);
         } else {
             for (Shard shard : shards) {
                 shard.render(batch);
@@ -195,16 +190,10 @@ public class PlayerSquare extends Actor {
         }
     }
 
-    public void render() {
-        update();
-
-    }
-
     public void jump() {
         if (!animated) {
             invulnerable = true;
             animated = true;
-            view.switchTexture();
             state = State.TELEPORTING;
             jumpPos.set(getX(), getY());
             destination.y += ENEMY_SPACE * 2;
@@ -217,55 +206,48 @@ public class PlayerSquare extends Actor {
         Rectangle player = new Rectangle(body.getPosition().x * PPM - getWidth() / 2, body.getPosition().y * PPM - getHeight() / 2, getWidth(), getHeight());
         if (player.overlaps(enemy)) {
             overlaps = true;
-            if (isInvulnerable()) {
-                return false;
-            } else return true;
+            return !isInvulnerable();
         }
         overlaps = false;
         return false;
     }
 
-    private class View{
-
-        private Sprite sprite;
-        private int tNum;
+    private class View extends Actor {
+        private Image image;
+        private Texture texture;
         private Random r;
+        private int tnum;
 
-        private View() {
-            sprite = new Sprite();
+        View() {
             r = new Random();
-            switchTexture();
+            resetImage();
         }
 
-        public void draw(Batch batch, float parentAlpha) {
-            sprite.draw(batch);
+        void resetImage() {
+            int prnum = tnum;
+            while ((tnum = r.nextInt(4) + 1) == prnum) ;
+            texture = game.asset.get("player-" + tnum + ".png", Texture.class);
+            image = new Image(texture);
+            image.setPosition(PlayerSquare.this.getOriginX(), PlayerSquare.this.getOriginY());
         }
 
-        public void switchTexture() {
-            int tNext = tNum;
-            while (tNext == tNum) {
-                tNum = r.nextInt(4);
-            }
-            switch (tNum) {
-                case 0:
-                    sprite.setTexture(game.asset.get("enemy-1.png", Texture.class));
-                    break;
-                case 1:
-                    sprite.setTexture(game.asset.get("enemy-2.png", Texture.class));
-                    break;
-                case 2:
-                    sprite.setTexture(game.asset.get("enemy-3.png", Texture.class));
-                    break;
-                case 3:
-                    sprite.setTexture(game.asset.get("enemy-4.png", Texture.class));
-                    break;
-            }
+        Texture getTexture() {
+            return texture;
         }
 
-        public Texture getTexturePattern() {
-            return sprite.getTexture();
+        Image getImage() {
+            return image;
         }
 
+        @Override
+        public float getWidth() {
+            return image.getWidth();
+        }
+
+        @Override
+        public float getHeight() {
+            return image.getHeight();
+        }
     }
 
     private class Shard {
@@ -277,7 +259,7 @@ public class PlayerSquare extends Actor {
 
 
         Shard(int i, int j, float x, float y) {
-            texture = view.getTexturePattern();
+            texture = view.getTexture();
             textureRegion = new TextureRegion(texture);
             BodyDef def = new BodyDef();
             def.type = BodyDef.BodyType.DynamicBody;
@@ -338,12 +320,9 @@ public class PlayerSquare extends Actor {
     }
 
     public void dispose() {
-        texture.dispose();
-        teleAnimTexture.dispose();
         for (Shard shard : shards) {
             shard.dispose();
         }
-        moveAnimTexture.dispose();
     }
 
     public boolean isDead() {
@@ -354,21 +333,22 @@ public class PlayerSquare extends Actor {
     public void setPosition(float x, float y) {
         super.setPosition(x, y);
         body.setTransform(x / PPM, y / PPM, 0);
-//        view.setPosition(x, y);
     }
 
     @Override
     public void setX(float x) {
         super.setX(x);
         body.setTransform(x / PPM, body.getPosition().y, 0);
-//        view.setX(x);
     }
 
     @Override
     public void setY(float y) {
         super.setY(y);
         body.setTransform(body.getPosition().x, y / PPM, 0);
-//        view.setY(y);
+    }
+
+    public void setInvulnerable(boolean invulnerable) {
+        this.invulnerable = invulnerable;
     }
 
     @Override

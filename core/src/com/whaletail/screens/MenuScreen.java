@@ -5,12 +5,14 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
+import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.whaletail.WhaleGdxGame;
 import com.whaletail.gui.Button;
@@ -36,6 +38,7 @@ public class MenuScreen implements Screen {
     private WhaleGdxGame game;
     private Button playButton;
     private Image background;
+    private Image musicButton;
     private Texture foreground;
     private ViewActor view1;
     private ViewActor view2;
@@ -48,8 +51,6 @@ public class MenuScreen implements Screen {
         this.game = game;
         stage = new Stage(new FillViewport(WhaleGdxGame.V_WIDTH, WhaleGdxGame.V_HEIGHT, game.cam));
         backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("Chris_Zabriskie_-_06_-_Divider.mp3"));
-        backgroundMusic.setLooping(true);
-//        backgroundMusic.play();
     }
 
     @Override
@@ -97,6 +98,7 @@ public class MenuScreen implements Screen {
         Gdx.input.setInputProcessor(stage);
 
         stage.addActor(background);
+        stage.addActor(musicButton);
         stage.addActor(view1);
         stage.addActor(view2);
         stage.addActor(view3);
@@ -112,13 +114,75 @@ public class MenuScreen implements Screen {
     }
 
     private void createGUI() {
+        if (game.prefs.getBoolean("play-music", true)) {
+            backgroundMusic.setLooping(true);
+            backgroundMusic.play();
+            musicButton = new Image(game.asset.get("musicButton.png", Texture.class));
+        } else {
+            musicButton = new Image(game.asset.get("noMusicButton.png", Texture.class));
+        }
+        musicButton.setPosition(50, 50);
+        musicButton.addListener(new ActorGestureListener() {
+            @Override
+            public void tap(InputEvent event, float x, float y, int count, int button) {
+                if (backgroundMusic.isPlaying()) {
+                    game.prefs.putBoolean("play-music", false);
+                    game.prefs.flush();
+                    musicButton.setDrawable(new SpriteDrawable(new Sprite(game.asset.get("noMusicButton.png", Texture.class))));
+                    backgroundMusic.pause();
+                } else {
+                    game.prefs.putBoolean("play-music", true);
+                    game.prefs.flush();
+                    musicButton.setDrawable(new SpriteDrawable(new Sprite(game.asset.get("musicButton.png", Texture.class))));
+                    backgroundMusic.play();
+                }
+            }
+        });
         playButton = new Button(game.asset.get("playButton.png", Texture.class));
         playButton.setPosition(stage.getWidth() / 2 - playButton.getWidth() / 2,
                 stage.getHeight() / 2 - playButton.getHeight());
         playButton.addListener(new ActorGestureListener() {
+            boolean started;
+
             @Override
             public void tap(InputEvent event, float x, float y, int count, int button) {
-                start();
+                if (!started) {
+                    start();
+                }
+
+            }
+
+            private void start() {
+                started = true;
+                for (int i = 0; i < 6; i++) {
+                    int y = 10 + ENEMY_SPACE + i * ENEMY_SPACE;
+                    EnemySquare.View view = new EnemySquare.View(game.asset.get("enemy-" + (MathUtils.random(3) + 1) + ".png", Texture.class), MathUtils.random(5) + 5, MathUtils.random(3) + 1);
+                    ViewActor actor = new ViewActor(new Vector2(0 - view.getWidth(), y),
+                            new Vector2(stage.getWidth(), y),
+                            view);
+                    stage.addActor(actor);
+                    actor.toFront();
+                    actor.move((MathUtils.random(3) + 3) / 10f);
+                }
+                view1.setDirection(new Vector2(stage.getWidth(), view1.getY()));
+                view1.move((MathUtils.random(3) + 3) / 10f);
+                view2.setDirection(new Vector2(stage.getWidth(), view2.getY()));
+                view2.move((MathUtils.random(3) + 3) / 10f);
+                view3.setDirection(new Vector2(stage.getWidth(), view3.getY()));
+                view3.move((MathUtils.random(3) + 3) / 10f);
+
+                EnemySquare.View view = new EnemySquare.View(foreground, 1, 1);
+                shim = new ViewActor(new Vector2(0 - view.getWidth(), 0),
+                        new Vector2(0, 0),
+                        view) {
+                    @Override
+                    public void move(float speed) {
+                        addAction(sequence(delay(.25f), moveTo(this.direction.x, this.direction.y, speed)));
+                    }
+                };
+                stage.addActor(shim);
+                shim.toFront();
+                shim.move(.7f);
             }
         });
 
@@ -135,38 +199,6 @@ public class MenuScreen implements Screen {
         numberFont.setY(reachFont.getY() - reachFont.getHeight());
     }
 
-    private void start() {
-
-        for (int i = 0; i < 6; i++) {
-            int y = 10 + ENEMY_SPACE + i * ENEMY_SPACE;
-            EnemySquare.View view = new EnemySquare.View(game.asset.get("enemy-" + (MathUtils.random(3) + 1) + ".png", Texture.class), MathUtils.random(5) + 5, MathUtils.random(3) + 1);
-            ViewActor actor = new ViewActor(new Vector2(0 - view.getWidth(), y),
-                    new Vector2(stage.getWidth(), y),
-                    view);
-            stage.addActor(actor);
-            actor.toFront();
-            actor.move((MathUtils.random(3) + 3) / 10f);
-        }
-        view1.setDirection(new Vector2(stage.getWidth(), view1.getY()));
-        view1.move((MathUtils.random(3) + 3) / 10f);
-        view2.setDirection(new Vector2(stage.getWidth(), view2.getY()));
-        view2.move((MathUtils.random(3) + 3) / 10f);
-        view3.setDirection(new Vector2(stage.getWidth(), view3.getY()));
-        view3.move((MathUtils.random(3) + 3) / 10f);
-
-        EnemySquare.View view = new EnemySquare.View(foreground, 1, 1);
-        shim = new ViewActor(new Vector2(0 - view.getWidth(), 0),
-                new Vector2(0, 0),
-                view) {
-            @Override
-            public void move(float speed) {
-                addAction(sequence(delay(.25f), moveTo(this.direction.x, this.direction.y, speed)));
-            }
-        };
-        stage.addActor(shim);
-        shim.toFront();
-        shim.move(.7f);
-    }
 
     @Override
     public void render(float delta) {
