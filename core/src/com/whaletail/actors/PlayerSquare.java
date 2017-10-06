@@ -55,6 +55,7 @@ public class PlayerSquare extends Actor {
     private Vector2 destination;
     private OrthographicCamera camera;
     private Vector2 jumpPos;
+    public boolean shouldJump;
 
     public PlayerSquare(CantReachGame game, OrthographicCamera camera, float x, float y) {
         this.game = game;

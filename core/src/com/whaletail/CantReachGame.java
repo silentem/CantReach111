@@ -9,10 +9,10 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.physics.box2d.World;
 import com.whaletail.gui.Score;
+import com.whaletail.screens.GameScreen;
 import com.whaletail.screens.LoadingScreen;
 import com.whaletail.screens.LossScreen;
 import com.whaletail.screens.MenuScreen;
-import com.whaletail.screens.PlayScreen;
 
 public class CantReachGame extends Game {
 
@@ -30,7 +30,7 @@ public class CantReachGame extends Game {
     public Score score;
 
     public MenuScreen menuScreen;
-    public PlayScreen playScreen;
+    public GameScreen gameScreen;
     public LossScreen lossScreen;
 
     @Override
@@ -42,7 +42,7 @@ public class CantReachGame extends Game {
         prefs = Gdx.app.getPreferences("WhaleTailPreferences");
 
         menuScreen = new MenuScreen(this);
-        playScreen = new PlayScreen(this);
+        gameScreen = new GameScreen(this);
         lossScreen = new LossScreen(this);
 
         initFonts();
@@ -59,7 +59,7 @@ public class CantReachGame extends Game {
     public void dispose() {
         asset.dispose();
         menuScreen.dispose();
-        playScreen.dispose();
+        gameScreen.dispose();
         lossScreen.dispose();
     }
 

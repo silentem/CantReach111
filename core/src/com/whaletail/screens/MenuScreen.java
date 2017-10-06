@@ -37,7 +37,7 @@ import static com.whaletail.actors.EnemySquare.ENEMY_SPACE;
  * @email silentem1113@gmail.com
  */
 
-public class MenuScreen implements Screen {
+public class MenuScreen extends BaseScreen {
 
     private Text canNotFont;
     private Text reachFont;
@@ -160,7 +160,7 @@ public class MenuScreen implements Screen {
                     new Runnable() {
                         @Override
                         public void run() {
-                            game.setScreen(game.playScreen);
+                            game.setScreen(game.gameScreen);
                         }
                     })));
         }
@@ -169,16 +169,6 @@ public class MenuScreen implements Screen {
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, false);
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
     }
 
     @Override

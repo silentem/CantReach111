@@ -20,7 +20,7 @@ import static com.whaletail.CantReachGame.V_WIDTH;
  * @email silentem1113@gmail.com
  */
 
-public class LoadingScreen implements Screen {
+public class LoadingScreen extends BaseScreen {
 
 
     private CantReachGame game;
@@ -67,21 +67,6 @@ public class LoadingScreen implements Screen {
         if (game.asset.update() && TimeUtils.timeSinceMillis(startTime) > 1000) {
             game.setScreen(game.menuScreen);
         }
-    }
-
-    @Override
-    public void resize(int width, int height) {
-
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
     }
 
     @Override

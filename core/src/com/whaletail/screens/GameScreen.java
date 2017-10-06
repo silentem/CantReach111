@@ -10,11 +10,9 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.FillViewport;
@@ -24,6 +22,8 @@ import com.whaletail.actors.EnemySquare;
 import com.whaletail.actors.PlayerSquare;
 import com.whaletail.gui.Score;
 import com.whaletail.gui.Text;
+import com.whaletail.listeners.GameActorGestureListener;
+import com.whaletail.listeners.TutorialActorGestureListener;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha;
 import static com.whaletail.actors.EnemySquare.ENEMY_SPACE;
@@ -33,7 +33,7 @@ import static com.whaletail.actors.EnemySquare.ENEMY_SPACE;
  * @email silentem1113@gmail.com
  */
 
-public class PlayScreen implements Screen {
+public class GameScreen extends BaseScreen {
 
     private static final float GRAVITY = -9.8f;
     private static final String TAP_TUT = "Tap to move \none forward";
@@ -51,15 +51,25 @@ public class PlayScreen implements Screen {
     private Stage stage;
     private Stage stageHUD;
     private Stage stageTutorial;
-    //    private CancelButton cancelButton;
-    private boolean shouldJump;
+    private final Label tapText;
+    private final Label swipeText;
+    private final Label canReachText;
+    private final Image tapImage;
+    private final Image swipeImage;
 
-    public PlayScreen(CantReachGame game) {
+    public GameScreen(CantReachGame game) {
         this.game = game;
         gameCam = game.cam;
         stage = new Stage(new FillViewport(CantReachGame.V_WIDTH, CantReachGame.V_HEIGHT, gameCam));
         stageHUD = new Stage(new FitViewport(CantReachGame.V_WIDTH, CantReachGame.V_HEIGHT, gameCam));
         b2dr = new Box2DDebugRenderer();
+        tapImage = new Image(game.asset.get("tap_icon.png", Texture.class));
+        swipeImage = new Image(game.asset.get("swipe_icon.png", Texture.class));
+        Label.LabelStyle ls = new Label.LabelStyle();
+        ls.font = game.font30;
+        tapText = new Label(TAP_TUT, ls);
+        swipeText = new Label(SWIPE_TUT, ls);
+        canReachText = new Label(CAN_REACH_TUT, ls);
     }
 
     @Override
@@ -70,13 +80,7 @@ public class PlayScreen implements Screen {
             Gdx.input.setInputProcessor(stageTutorial);
             stage.addAction(alpha(.5f));
             stageHUD.addAction(alpha(.5f));
-            final Image tapImage = new Image(game.asset.get("tap_icon.png", Texture.class));
-            final Image swipeImage = new Image(game.asset.get("swipe_icon.png", Texture.class));
-            Label.LabelStyle ls = new Label.LabelStyle();
-            ls.font = game.font30;
-            final Label tapText = new Label(TAP_TUT, ls);
-            final Label swipeText = new Label(SWIPE_TUT, ls);
-            final Label canReachText = new Label(CAN_REACH_TUT, ls);
+
             tapImage.setPosition(stage.getWidth() / 2 - tapImage.getWidth() / 2, stage.getHeight() / 2 - tapImage.getHeight() / 2);
             tapText.setX(stage.getWidth() / 2 - tapText.getWidth() / 2);
             tapText.setY(tapImage.getY() - tapText.getHeight() - 50);
@@ -88,37 +92,7 @@ public class PlayScreen implements Screen {
             stageTutorial.addActor(tapImage);
             stageTutorial.addActor(tapText);
 
-            stageTutorial.addListener(new ActorGestureListener() {
-                int count = 0;
-
-                @Override
-                public void tap(InputEvent event, float x, float y, int count, int button) {
-                    this.count++;
-                    if (this.count == 1) {
-                        System.out.println("1 tap");
-                        System.out.println(count);
-                        tapImage.remove();
-                        tapText.remove();
-                        stageTutorial.addActor(swipeImage);
-                        stageTutorial.addActor(swipeText);
-                    } else if (this.count == 2) {
-                        System.out.println("2 tap");
-                        System.out.println(count);
-                        swipeImage.remove();
-                        swipeText.remove();
-                        stageTutorial.addActor(canReachText);
-                    } else if (this.count == 3) {
-                        System.out.println(count);
-                        canReachText.remove();
-                        stageTutorial.dispose();
-                        stageTutorial = null;
-                        stage.addAction(alpha(1f));
-                        stageHUD.addAction(alpha(1f));
-                        Gdx.input.setInputProcessor(stage);
-                        this.count++;
-                    }
-                }
-            });
+            stageTutorial.addListener(new TutorialActorGestureListener(this));
 
             game.prefs.putBoolean("tutorial_passed", true);
             game.prefs.flush();
@@ -127,7 +101,6 @@ public class PlayScreen implements Screen {
             Gdx.input.setInputProcessor(stage);
         }
 
-        shouldJump = false;
         game.world = new World(new Vector2(0, 0), true);
         player = new PlayerSquare(game, gameCam, stage.getViewport().getWorldWidth() / 2, 64);
         enemySquares = new Array<>();
@@ -153,58 +126,7 @@ public class PlayScreen implements Screen {
         }
         stageHUD.addActor(font);
         last = enemySquares.get(MAX_SIZE - 1);
-//        cancelButton = new CancelButton();
-//        stage.addActor(cancelButton);
-        stage.addListener(new ActorGestureListener() {
-            @Override
-            public void tap(InputEvent event, float x, float y, int count, int button) {
-                if (!player.animated && !player.isDead()) {
-                    game.score.add(1);
-                    font.setText(game.score);
-                    System.out.println("Score = " + game.score);
-                    player.move();
-                    shouldJump = false;
-                }
-            }
-
-            @Override
-            public void fling(InputEvent event, float velocityX, float velocityY, int button) {
-                if (!player.animated && shouldJump && !player.isDead()) {
-                    game.score.add(2);
-                    font.setText(game.score);
-                    System.out.println("Score = " + game.score);
-                    player.jump();
-                }
-            }
-
-            @Override
-            public void pan(InputEvent event, float x, float y, float deltaX, float deltaY) {
-//                Rectangle cBRect = new Rectangle(cancelButton.getX(), cancelButton.getY(), cancelButton.getWidth(), cancelButton.getHeight());
-//                if (cBRect.contains(x, y)) {
-//                    shouldJump = false;
-//                } else {
-//                    shouldJump = true;
-//                }
-            }
-
-            @Override
-            public void touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                shouldJump = true;
-            }
-
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-//                cancelIsShown = false;
-//                Rectangle cBRect = new Rectangle(cancelButton.getX(), cancelButton.getY(), cancelButton.getWidth(), cancelButton.getHeight());
-//                if (cBRect.contains(x, y)) {
-//                    shouldJump = false;
-//
-//                    player.move();
-//                } else {
-//                    shouldJump = true;
-//                }
-            }
-        });
+        stage.addListener(new GameActorGestureListener(this));
     }
 
 
@@ -333,16 +255,6 @@ public class PlayScreen implements Screen {
     }
 
     @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
     public void hide() {
         stage.clear();
         stageHUD.clear();
@@ -350,7 +262,7 @@ public class PlayScreen implements Screen {
 
     @Override
     public void dispose() {
-        System.out.println("PlayScreen.dispose");
+        System.out.println("GameScreen.dispose");
         stageHUD.dispose();
         stage.dispose();
         player.dispose();
@@ -360,4 +272,59 @@ public class PlayScreen implements Screen {
         game.world.dispose();
     }
 
+    public int tapThroughTutorial(int count) {
+        switch (count) {
+            case 1: {
+                System.out.println("1 tap");
+                System.out.println(count);
+                tapImage.remove();
+                tapText.remove();
+                stageTutorial.addActor(swipeImage);
+                stageTutorial.addActor(swipeText);
+                return count;
+            }
+            case 2: {
+                System.out.println("2 tap");
+                System.out.println(count);
+                swipeImage.remove();
+                swipeText.remove();
+                stageTutorial.addActor(canReachText);
+                return count;
+            }
+            case 3: {
+                System.out.println(count);
+                canReachText.remove();
+                stageTutorial.dispose();
+                stageTutorial = null;
+                stage.addAction(alpha(1f));
+                stageHUD.addAction(alpha(1f));
+                Gdx.input.setInputProcessor(stage);
+                return 4;
+            }
+        }
+        return 0;
+    }
+
+    public void movePlayer() {
+        if (!player.animated && !player.isDead()) {
+            game.score.add(1);
+            font.setText(game.score);
+            System.out.println("Score = " + game.score);
+            player.move();
+            player.shouldJump = false;
+        }
+    }
+
+    public void jumpPlayer() {
+        if (!player.animated && player.shouldJump && !player.isDead()) {
+            game.score.add(2);
+            font.setText(game.score);
+            System.out.println("Score = " + game.score);
+            player.jump();
+        }
+    }
+
+    public void stopPlayer() {
+        player.shouldJump = true;
+    }
 }

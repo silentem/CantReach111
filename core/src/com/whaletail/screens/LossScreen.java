@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
+import com.badlogic.gdx.utils.compression.lzma.Base;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.whaletail.CantReachGame;
@@ -28,7 +29,7 @@ import static com.whaletail.Constants.REACH;
  * @email silentem1113@gmail.com
  */
 
-public class LossScreen implements Screen {
+public class LossScreen extends BaseScreen {
 
     private CantReachGame game;
     private Image background;
@@ -93,7 +94,7 @@ public class LossScreen implements Screen {
         againButton.addListener(new ActorGestureListener() {
             @Override
             public void tap(InputEvent event, float x, float y, int count, int button) {
-                game.setScreen(game.playScreen);
+                game.setScreen(game.gameScreen);
             }
         });
         againButton.setOrigin(againButton.getWidth() / 2, againButton.getHeight() / 2);
@@ -165,16 +166,6 @@ public class LossScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
 
     }
 
