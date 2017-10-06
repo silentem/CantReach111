@@ -23,7 +23,7 @@ public class Button extends Actor {
         this(texture, 0, 0);
     }
 
-    public Button(Texture texture, float x, float y) {
+    private Button(Texture texture, float x, float y) {
         this.texture = texture;
         sprite = new Sprite(texture);
         this.x = x;
@@ -32,20 +32,11 @@ public class Button extends Actor {
         setBounds(x, y, texture.getWidth(), texture.getHeight());
     }
 
-    public boolean contains(float x, float y){
-        Rectangle rectangle = new Rectangle(x, y, getWidth(), getHeight());
-        return rectangle.contains(x, y);
-    }
-
     @Override
     public void setPosition(float x, float y) {
         setX(x);
         setY(y);
     }
-
-//    public void setTexture(Texture texture) {
-//        this.texture = texture;
-//    }
 
     @Override
     public float getWidth() {
@@ -84,7 +75,4 @@ public class Button extends Actor {
         this.y = y;
     }
 
-    public void dispose(){
-        texture.dispose();
-    }
 }

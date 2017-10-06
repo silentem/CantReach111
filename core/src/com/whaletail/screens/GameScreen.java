@@ -76,7 +76,7 @@ public class GameScreen extends BaseScreen {
         player = new PlayerSquare(game, gameCam, stage.getViewport().getWorldWidth() / 2, 64);
         enemySquares = new Array<>();
         game.score = new Score();
-        font = new Text(game.score, game.font30, stage);
+        font = new Text(game.score.toString(), game.font30, stage);
         Image background = new Image(game.asset.get("background.png", Texture.class)) {
             @Override
             public void draw(Batch batch, float parentAlpha) {
@@ -303,7 +303,7 @@ public class GameScreen extends BaseScreen {
 
     public void addScore(int amount){
         game.score.add(amount);
-        font.setText(game.score);
+        font.setText(game.score.toString());
     }
 
     public PlayerSquare getPlayer() {

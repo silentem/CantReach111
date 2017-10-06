@@ -1,12 +1,10 @@
 package com.whaletail.gui;
 
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.whaletail.Constants;
 
 /**
  * @author Whaletail
@@ -15,39 +13,37 @@ import com.whaletail.Constants;
 
 public class Text extends Actor {
 
-    private Object text;
+    private String text;
     private BitmapFont font;
     private GlyphLayout glyphLayout;
     private float x;
     private float y;
     private Stage stage;
 
-    public Text(Object text, BitmapFont font) {
-        this.text = text.toString();
+    public Text(String text, BitmapFont font) {
+        this.text = text;
         long start = System.currentTimeMillis();
         this.font = font;
         System.out.println(System.currentTimeMillis() - start);
-        glyphLayout = new GlyphLayout(font, text.toString());
+        glyphLayout = new GlyphLayout(font, text);
     }
 
-    public Text(Object text, BitmapFont font, Stage stage) {
-        this.text = text.toString();
+    public Text(String text, BitmapFont font, Stage stage) {
+        this.text = text;
         this.stage = stage;
-        long start = System.currentTimeMillis();
         this.font = font;
-        System.out.println(System.currentTimeMillis() - start);
-        glyphLayout = new GlyphLayout(font, text.toString());
+        glyphLayout = new GlyphLayout(font, text);
     }
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
         if (stage != null) {
-            font.draw(batch, text.toString(),
-                    stage.getWidth()  - getWidth() - 10,
-                    stage.getCamera().position.y + stage.getHeight()/2 - 10);
+            font.draw(batch, text,
+                    stage.getWidth() - getWidth() - 10,
+                    stage.getCamera().position.y + stage.getHeight() / 2 - 10);
 
         } else {
-            font.draw(batch, text.toString(), x, y);
+            font.draw(batch, text, x, y);
         }
     }
 
@@ -61,13 +57,9 @@ public class Text extends Actor {
         this.y = y;
     }
 
-    public String getText() {
-        return text.toString();
-    }
-
-    public void setText(Object text) {
+    public void setText(String text) {
         this.text = text;
-        glyphLayout.setText(font, text.toString());
+        glyphLayout.setText(font, text);
     }
 
     @Override
