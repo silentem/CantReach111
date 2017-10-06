@@ -5,8 +5,14 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.whaletail.WhaleGdxGame;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.whaletail.CantReachGame;
+
+import static com.whaletail.CantReachGame.V_HEIGHT;
+import static com.whaletail.CantReachGame.V_WIDTH;
 
 
 /**
@@ -17,14 +23,26 @@ import com.whaletail.WhaleGdxGame;
 public class LoadingScreen implements Screen {
 
 
-    private WhaleGdxGame game;
-    private TextureRegion logo;
+    private CantReachGame game;
+    private Image logo;
+    private final Stage stage;
     private long startTime;
 
 
-    public LoadingScreen(WhaleGdxGame game) {
+    public LoadingScreen(CantReachGame game) {
         this.game = game;
-        logo = new TextureRegion(new Texture("CompanyIconInverted.png"));
+        logo = new Image(new TextureRegion(new Texture("CompanyIconInverted.png")));
+        fitLogoToScreen();
+        stage = new Stage(new FitViewport(V_WIDTH, V_HEIGHT, game.cam));
+        stage.addActor(logo);
+    }
+
+    private void fitLogoToScreen() {
+        int imageLength = V_WIDTH;
+        logo.setWidth(logo.getWidth() * imageLength / logo.getHeight());
+        logo.setHeight(imageLength);
+        logo.setPosition(game.cam.viewportWidth / 2 - logo.getWidth() / 2,
+                game.cam.viewportHeight / 2 - logo.getHeight() / 2);
     }
 
     @Override
@@ -37,20 +55,15 @@ public class LoadingScreen implements Screen {
     public void render(float delta) {
         Gdx.gl.glClearColor(42 / 256f, 44 / 256f, 44 / 256f, 0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        game.batch.setProjectionMatrix(game.cam.combined);
 
-        game.batch.begin();
-        game.batch.draw(logo,
-                game.cam.viewportWidth / 2 - logo.getTexture().getWidth() / 2,
-                game.cam.viewportHeight / 2 - logo.getTexture().getHeight() / 2,
-                logo.getTexture().getWidth() / 2, logo.getTexture().getHeight() / 2,
-                logo.getTexture().getWidth(), logo.getTexture().getHeight(), .25f, .25f, 0);
-        game.batch.end();
+        stage.getViewport().apply();
+        stage.act(delta);
+        stage.draw();
 
-        update(delta);
+        update();
     }
 
-    private void update(float delta) {
+    private void update() {
         if (game.asset.update() && TimeUtils.timeSinceMillis(startTime) > 1000) {
             game.setScreen(game.menuScreen);
         }
@@ -78,7 +91,7 @@ public class LoadingScreen implements Screen {
 
     @Override
     public void dispose() {
-        logo.getTexture().dispose();
+        stage.dispose();
     }
 
     private void queueAssets() {

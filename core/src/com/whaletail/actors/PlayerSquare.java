@@ -1,10 +1,8 @@
-package com.whaletail.sprites;
+package com.whaletail.actors;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -19,13 +17,16 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
-import com.whaletail.WhaleGdxGame;
+import com.whaletail.CantReachGame;
 
 import java.util.Random;
 
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.moveTo;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.run;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.scaleTo;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 import static com.whaletail.Constants.PPM;
-import static com.whaletail.sprites.EnemySquare.ENEMY_SPACE;
+import static com.whaletail.actors.EnemySquare.ENEMY_SPACE;
 
 /**
  * @author Whaletail
@@ -35,14 +36,14 @@ import static com.whaletail.sprites.EnemySquare.ENEMY_SPACE;
 public class PlayerSquare extends Actor {
 
 
-    private enum State {STANDING, TELEPORTING, MOVING;}
+    private enum State {STANDING, TELEPORTING, MOVING}
 
     private static final int PLAYER_WIDTH = 32;
 
     private static final int PLAYER_HEIGHT = 32;
 
     private State state;
-    private WhaleGdxGame game;
+    private CantReachGame game;
     private boolean overlaps;
     private View view;
     private Array<Shard> shards;
@@ -55,7 +56,7 @@ public class PlayerSquare extends Actor {
     private OrthographicCamera camera;
     private Vector2 jumpPos;
 
-    public PlayerSquare(WhaleGdxGame game, OrthographicCamera camera, float x, float y) {
+    public PlayerSquare(CantReachGame game, OrthographicCamera camera, float x, float y) {
         this.game = game;
         this.camera = camera;
         world = game.world;
@@ -65,7 +66,7 @@ public class PlayerSquare extends Actor {
         animated = false;
         dead = false;
         jumpPos = new Vector2();
-        shards = new Array<Shard>();
+        shards = new Array<>();
         body = createBody();
         setX(x);
         setY(y);
@@ -225,7 +226,9 @@ public class PlayerSquare extends Actor {
 
         void resetImage() {
             int prnum = tnum;
-            while ((tnum = r.nextInt(4) + 1) == prnum) ;
+            while (tnum == prnum) {
+                tnum = r.nextInt(4) + 1;
+            }
             texture = game.asset.get("player-" + tnum + ".png", Texture.class);
             image = new Image(texture);
             image.setPosition(PlayerSquare.this.getOriginX(), PlayerSquare.this.getOriginY());
@@ -295,7 +298,7 @@ public class PlayerSquare extends Actor {
         }
     }
 
-    public boolean isInvulnerable() {
+    private boolean isInvulnerable() {
         return invulnerable;
     }
 

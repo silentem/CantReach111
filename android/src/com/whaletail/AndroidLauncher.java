@@ -12,8 +12,6 @@ import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 
-import java.util.ArrayList;
-
 public class AndroidLauncher extends AndroidApplication {
 
 
@@ -29,7 +27,7 @@ public class AndroidLauncher extends AndroidApplication {
         config.useCompass = false;
 
         RelativeLayout relativeLayout = new RelativeLayout(this);
-        View viewGame = initializeForView(new WhaleGdxGame(), config);
+        View viewGame = initializeForView(new CantReachGame(), config);
         adView = new AdView(this);
 
         adView.setAdListener(new AdListener() {

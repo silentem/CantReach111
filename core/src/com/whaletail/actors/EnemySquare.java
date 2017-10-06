@@ -1,4 +1,4 @@
-package com.whaletail.sprites;
+package com.whaletail.actors;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -11,7 +11,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Timer;
-import com.whaletail.WhaleGdxGame;
+import com.whaletail.CantReachGame;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
 import static com.whaletail.Constants.PPM;
@@ -23,8 +23,8 @@ import static com.whaletail.Constants.PPM;
 
 public class EnemySquare extends Actor {
 
-    public static final int ENEMY_WIDTH = 16;
-    public static final int ENEMY_HEIGHT = 16;
+    private static final int ENEMY_WIDTH = 16;
+    private static final int ENEMY_HEIGHT = 16;
     private static final int GAP = 6;
     public static final int ENEMY_SPACE = GAP + 64 + GAP;
 
@@ -32,11 +32,11 @@ public class EnemySquare extends Actor {
     private int speed;
     private boolean rightLeft;
     private float maxWidth;
-    private WhaleGdxGame game;
+    private CantReachGame game;
     private World world;
     private Body body;
 
-    public EnemySquare(float y, int speed, float maxWidth, WhaleGdxGame game) {
+    public EnemySquare(float y, int speed, float maxWidth, CantReachGame game) {
         this.speed = speed;
         this.maxWidth = maxWidth;
         this.game = game;
@@ -185,10 +185,6 @@ public class EnemySquare extends Actor {
                     batch.draw(texturePattern, i, j);
                 }
             }
-        }
-
-        public void draw(Batch batch, float x, float y, int width, int height) {
-            batch.draw(texturePattern, x, y, width, height);
         }
 
         public float getWidth() {

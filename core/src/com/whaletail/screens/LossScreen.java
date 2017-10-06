@@ -10,15 +10,13 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
-import com.whaletail.WhaleGdxGame;
+import com.whaletail.CantReachGame;
 import com.whaletail.gui.Button;
 import com.whaletail.gui.Text;
 import com.whaletail.gui.ViewActor;
-import com.whaletail.sprites.EnemySquare;
+import com.whaletail.actors.EnemySquare;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
 import static com.whaletail.Constants.CAN_NOT;
@@ -32,7 +30,7 @@ import static com.whaletail.Constants.REACH;
 
 public class LossScreen implements Screen {
 
-    private WhaleGdxGame game;
+    private CantReachGame game;
     private Image background;
     private Image againButton;
     private Button homeButton;
@@ -49,11 +47,11 @@ public class LossScreen implements Screen {
     private Text reachText;
     private Text numberText;
 
-    public LossScreen(WhaleGdxGame game) {
+    public LossScreen(CantReachGame game) {
         this.game = game;
         cam = game.cam;
-        stage = new Stage(new FitViewport(WhaleGdxGame.V_WIDTH, WhaleGdxGame.V_HEIGHT, cam));
-        stageHUD = new Stage(new FillViewport(WhaleGdxGame.V_WIDTH, WhaleGdxGame.V_HEIGHT, cam));
+        stage = new Stage(new FitViewport(CantReachGame.V_WIDTH, CantReachGame.V_HEIGHT, cam));
+        stageHUD = new Stage(new FillViewport(CantReachGame.V_WIDTH, CantReachGame.V_HEIGHT, cam));
 
     }
 

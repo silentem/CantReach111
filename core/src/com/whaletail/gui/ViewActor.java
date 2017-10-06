@@ -3,7 +3,7 @@ package com.whaletail.gui;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.whaletail.sprites.EnemySquare;
+import com.whaletail.actors.EnemySquare;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.moveTo;
 

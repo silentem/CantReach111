@@ -19,15 +19,14 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.whaletail.WhaleGdxGame;
+import com.whaletail.CantReachGame;
+import com.whaletail.actors.EnemySquare;
+import com.whaletail.actors.PlayerSquare;
 import com.whaletail.gui.Score;
 import com.whaletail.gui.Text;
-import com.whaletail.sprites.EnemySquare;
-import com.whaletail.sprites.PlayerSquare;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha;
-import static com.whaletail.Constants.PPM;
-import static com.whaletail.sprites.EnemySquare.ENEMY_SPACE;
+import static com.whaletail.actors.EnemySquare.ENEMY_SPACE;
 
 /**
  * @author Whaletail
@@ -37,17 +36,16 @@ import static com.whaletail.sprites.EnemySquare.ENEMY_SPACE;
 public class PlayScreen implements Screen {
 
     private static final float GRAVITY = -9.8f;
-    public static final String TAP_TUT = "Tap to move \none forward";
-    public static final String SWIPE_TUT = "Swipe to \njump over one";
-    public static final String CAN_REACH_TUT = "Can you \nreach 111?";
+    private static final String TAP_TUT = "Tap to move \none forward";
+    private static final String SWIPE_TUT = "Swipe to \njump over one";
+    private static final String CAN_REACH_TUT = "Can you \nreach 111?";
 
-    private WhaleGdxGame game;
+    private CantReachGame game;
     private OrthographicCamera gameCam;
-    private Image background;
     private PlayerSquare player;
     private Array<EnemySquare> enemySquares;
     private Text font;
-    private int maxSize;
+    private static final int MAX_SIZE = 16;
     private EnemySquare last;
     private Box2DDebugRenderer b2dr;
     private Stage stage;
@@ -56,14 +54,11 @@ public class PlayScreen implements Screen {
     //    private CancelButton cancelButton;
     private boolean shouldJump;
 
-    private boolean debug;
-
-    public PlayScreen(WhaleGdxGame game) {
+    public PlayScreen(CantReachGame game) {
         this.game = game;
         gameCam = game.cam;
-        debug = false;
-        stage = new Stage(new FillViewport(WhaleGdxGame.V_WIDTH, WhaleGdxGame.V_HEIGHT, gameCam));
-        stageHUD = new Stage(new FitViewport(WhaleGdxGame.V_WIDTH, WhaleGdxGame.V_HEIGHT, gameCam));
+        stage = new Stage(new FillViewport(CantReachGame.V_WIDTH, CantReachGame.V_HEIGHT, gameCam));
+        stageHUD = new Stage(new FitViewport(CantReachGame.V_WIDTH, CantReachGame.V_HEIGHT, gameCam));
         b2dr = new Box2DDebugRenderer();
     }
 
@@ -71,7 +66,7 @@ public class PlayScreen implements Screen {
     public void show() {
 
         if (!game.prefs.getBoolean("tutorial_passed", false)) {
-            stageTutorial = new Stage(new FitViewport(WhaleGdxGame.V_WIDTH, WhaleGdxGame.V_HEIGHT, gameCam));
+            stageTutorial = new Stage(new FitViewport(CantReachGame.V_WIDTH, CantReachGame.V_HEIGHT, gameCam));
             Gdx.input.setInputProcessor(stageTutorial);
             stage.addAction(alpha(.5f));
             stageHUD.addAction(alpha(.5f));
@@ -138,8 +133,7 @@ public class PlayScreen implements Screen {
         enemySquares = new Array<>();
         game.score = new Score();
         font = new Text(game.score, game.font30, stage);
-        maxSize = 16;
-        background = new Image(game.asset.get("background.png", Texture.class)) {
+        Image background = new Image(game.asset.get("background.png", Texture.class)) {
             @Override
             public void draw(Batch batch, float parentAlpha) {
                 batch.draw(game.asset.get("background.png", Texture.class),
@@ -150,7 +144,7 @@ public class PlayScreen implements Screen {
         background.setZIndex(0);
         stage.addActor(player);
         int speed = 0;
-        for (int i = 0; i < maxSize; i++) {
+        for (int i = 0; i < MAX_SIZE; i++) {
             speed = getRandomSpeed(speed);
             EnemySquare enemySquare = new EnemySquare(
                     player.getY() + ENEMY_SPACE + i * ENEMY_SPACE, speed, gameCam.viewportWidth, game);
@@ -158,7 +152,7 @@ public class PlayScreen implements Screen {
             stage.addActor(enemySquare);
         }
         stageHUD.addActor(font);
-        last = enemySquares.get(maxSize - 1);
+        last = enemySquares.get(MAX_SIZE - 1);
 //        cancelButton = new CancelButton();
 //        stage.addActor(cancelButton);
         stage.addListener(new ActorGestureListener() {
@@ -264,7 +258,7 @@ public class PlayScreen implements Screen {
         Gdx.gl.glClearColor(42 / 256f, 44 / 256f, 44 / 256f, 0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        update(delta);
+        update();
         stage.getViewport().apply();
         stage.act(delta);
         stage.draw();
@@ -282,11 +276,7 @@ public class PlayScreen implements Screen {
 
     }
 
-    public Stage getStage() {
-        return stage;
-    }
-
-    private void update(float delta) {
+    private void update() {
         game.world.step(1 / 60f, 6, 2);
 
 
@@ -363,51 +353,11 @@ public class PlayScreen implements Screen {
         System.out.println("PlayScreen.dispose");
         stageHUD.dispose();
         stage.dispose();
+        player.dispose();
+        for (EnemySquare enemySquare : enemySquares) {
+            enemySquare.dispose();
+        }
         game.world.dispose();
     }
-
-//    private class CancelButton extends Actor {
-//        private Texture cancelButtonTexture;
-//        private float x;
-//
-//        private float y;
-//
-//        public CancelButton() {
-//            cancelButtonTexture = game.asset.get("cancelButton.png", Texture.class);
-//            setBounds(getX(), getY(), getWidth(), getHeight());
-//        }
-//
-//        @Override
-//        public void draw(Batch batch, float parentAlpha) {
-//            if (cancelIsShown && !player.isDead()) {
-//                batch.draw(cancelButtonTexture, getX(), getY());
-//            }
-//        }
-//
-//        @Override
-//        public float getWidth() {
-//            return cancelButtonTexture.getWidth();
-//        }
-//
-//        @Override
-//        public float getHeight() {
-//            return cancelButtonTexture.getHeight();
-//        }
-//
-//        @Override
-//        public float getX() {
-//            return x = gameCam.position.x + gameCam.viewportWidth / 2 - getWidth();
-//        }
-//
-//        @Override
-//        public float getY() {
-//            return y = gameCam.position.y - gameCam.viewportHeight / 4;
-//        }
-//
-//        public void dispose() {
-//            cancelButtonTexture.dispose();
-//        }
-//
-//    }
 
 }
