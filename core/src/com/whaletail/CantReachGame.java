@@ -41,13 +41,14 @@ public class CantReachGame extends Game {
         asset = new AssetManager();
         prefs = Gdx.app.getPreferences("WhaleTailPreferences");
 
+        LoadingScreen loadingScreen = new LoadingScreen(this);
         menuScreen = new MenuScreen(this);
         gameScreen = new GameScreen(this);
         lossScreen = new LossScreen(this);
 
         initFonts();
 
-        setScreen(new LoadingScreen(this));
+        setScreen(loadingScreen);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.whaletail.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -26,6 +25,10 @@ import com.whaletail.listeners.GameActorGestureListener;
 import com.whaletail.listeners.TutorialActorGestureListener;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha;
+import static com.whaletail.Constants.CAN_REACH_TUT;
+import static com.whaletail.Constants.GRAVITY;
+import static com.whaletail.Constants.SWIPE_TUT;
+import static com.whaletail.Constants.TAP_TUT;
 import static com.whaletail.actors.EnemySquare.ENEMY_SPACE;
 
 /**
@@ -34,11 +37,6 @@ import static com.whaletail.actors.EnemySquare.ENEMY_SPACE;
  */
 
 public class GameScreen extends BaseScreen {
-
-    private static final float GRAVITY = -9.8f;
-    private static final String TAP_TUT = "Tap to move \none forward";
-    private static final String SWIPE_TUT = "Swipe to \njump over one";
-    private static final String CAN_REACH_TUT = "Can you \nreach 111?";
 
     private CantReachGame game;
     private OrthographicCamera gameCam;
@@ -51,11 +49,12 @@ public class GameScreen extends BaseScreen {
     private Stage stage;
     private Stage stageHUD;
     private Stage stageTutorial;
-    private final Label tapText;
-    private final Label swipeText;
-    private final Label canReachText;
-    private final Image tapImage;
-    private final Image swipeImage;
+    private Label tapText;
+    private Label swipeText;
+    private Label canReachText;
+    private Image tapImage;
+    private Image swipeImage;
+    private boolean isTutorialPassed;
 
     public GameScreen(CantReachGame game) {
         this.game = game;
@@ -63,44 +62,16 @@ public class GameScreen extends BaseScreen {
         stage = new Stage(new FillViewport(CantReachGame.V_WIDTH, CantReachGame.V_HEIGHT, gameCam));
         stageHUD = new Stage(new FitViewport(CantReachGame.V_WIDTH, CantReachGame.V_HEIGHT, gameCam));
         b2dr = new Box2DDebugRenderer();
-        tapImage = new Image(game.asset.get("tap_icon.png", Texture.class));
-        swipeImage = new Image(game.asset.get("swipe_icon.png", Texture.class));
-        Label.LabelStyle ls = new Label.LabelStyle();
-        ls.font = game.font30;
-        tapText = new Label(TAP_TUT, ls);
-        swipeText = new Label(SWIPE_TUT, ls);
-        canReachText = new Label(CAN_REACH_TUT, ls);
     }
 
     @Override
     public void show() {
-
-        if (!game.prefs.getBoolean("tutorial_passed", false)) {
-            stageTutorial = new Stage(new FitViewport(CantReachGame.V_WIDTH, CantReachGame.V_HEIGHT, gameCam));
-            Gdx.input.setInputProcessor(stageTutorial);
-            stage.addAction(alpha(.5f));
-            stageHUD.addAction(alpha(.5f));
-
-            tapImage.setPosition(stage.getWidth() / 2 - tapImage.getWidth() / 2, stage.getHeight() / 2 - tapImage.getHeight() / 2);
-            tapText.setX(stage.getWidth() / 2 - tapText.getWidth() / 2);
-            tapText.setY(tapImage.getY() - tapText.getHeight() - 50);
-            swipeImage.setPosition(stage.getWidth() / 2 - swipeImage.getWidth() / 2, stage.getHeight() / 2 - swipeImage.getHeight() / 2);
-            swipeText.setX(stage.getWidth() / 2 - swipeText.getWidth() / 2);
-            swipeText.setY(swipeImage.getY() - swipeText.getHeight() - 50);
-            canReachText.setPosition(stage.getWidth() / 2 - canReachText.getWidth() / 2,
-                    stage.getHeight() / 2 - canReachText.getHeight() / 2);
-            stageTutorial.addActor(tapImage);
-            stageTutorial.addActor(tapText);
-
-            stageTutorial.addListener(new TutorialActorGestureListener(this));
-
-            game.prefs.putBoolean("tutorial_passed", true);
-            game.prefs.flush();
+        isTutorialPassed = game.prefs.getBoolean("tutorial_passed", false);
+        if (!isTutorialPassed) {
+            setupTutorial();
         } else {
-            stageTutorial = null;
             Gdx.input.setInputProcessor(stage);
         }
-
         game.world = new World(new Vector2(0, 0), true);
         player = new PlayerSquare(game, gameCam, stage.getViewport().getWorldWidth() / 2, 64);
         enemySquares = new Array<>();
@@ -127,6 +98,36 @@ public class GameScreen extends BaseScreen {
         stageHUD.addActor(font);
         last = enemySquares.get(MAX_SIZE - 1);
         stage.addListener(new GameActorGestureListener(this));
+    }
+
+    private void setupTutorial() {
+        stageTutorial = new Stage(new FitViewport(CantReachGame.V_WIDTH, CantReachGame.V_HEIGHT, gameCam));
+        Gdx.input.setInputProcessor(stageTutorial);
+        stage.addAction(alpha(.5f));
+        stageHUD.addAction(alpha(.5f));
+        tapImage = new Image(game.asset.get("tap_icon.png", Texture.class));
+        swipeImage = new Image(game.asset.get("swipe_icon.png", Texture.class));
+        Label.LabelStyle ls = new Label.LabelStyle();
+        ls.font = game.font30;
+        tapText = new Label(TAP_TUT, ls);
+        swipeText = new Label(SWIPE_TUT, ls);
+        canReachText = new Label(CAN_REACH_TUT, ls);
+        tapImage.setPosition(stage.getWidth() / 2 - tapImage.getWidth() / 2, stage.getHeight() / 2 - tapImage.getHeight() / 2);
+        tapText.setX(stage.getWidth() / 2 - tapText.getWidth() / 2);
+        tapText.setY(tapImage.getY() - tapText.getHeight() - 50);
+        swipeImage.setPosition(stage.getWidth() / 2 - swipeImage.getWidth() / 2, stage.getHeight() / 2 - swipeImage.getHeight() / 2);
+        swipeText.setX(stage.getWidth() / 2 - swipeText.getWidth() / 2);
+        swipeText.setY(swipeImage.getY() - swipeText.getHeight() - 50);
+        canReachText.setPosition(stage.getWidth() / 2 - canReachText.getWidth() / 2,
+                stage.getHeight() / 2 - canReachText.getHeight() / 2);
+        stageTutorial.addActor(tapImage);
+        stageTutorial.addActor(tapText);
+
+        stageTutorial.addListener(new TutorialActorGestureListener(this));
+
+        game.prefs.putBoolean("tutorial_passed", true);
+        game.prefs.flush();
+        isTutorialPassed = true;
     }
 
 
@@ -189,7 +190,7 @@ public class GameScreen extends BaseScreen {
         stageHUD.act(delta);
         stageHUD.draw();
 
-        if (stageTutorial != null) {
+        if (!isTutorialPassed) {
             stageTutorial.getViewport().apply();
             stageTutorial.act(delta);
             stageTutorial.draw();
@@ -231,12 +232,12 @@ public class GameScreen extends BaseScreen {
         player.setInvulnerable(true);
         float delay = 4f;
 
-        game.prefs.putBoolean("win", true);
+        game.prefs.putBoolean("lose", true);
         game.prefs.flush();
 
         player.win();
         for (EnemySquare enemySquare : enemySquares) {
-            enemySquare.win();
+            enemySquare.lose();
         }
 
         Timer.schedule(new Timer.Task() {
@@ -275,8 +276,6 @@ public class GameScreen extends BaseScreen {
     public int tapThroughTutorial(int count) {
         switch (count) {
             case 1: {
-                System.out.println("1 tap");
-                System.out.println(count);
                 tapImage.remove();
                 tapText.remove();
                 stageTutorial.addActor(swipeImage);
@@ -284,15 +283,12 @@ public class GameScreen extends BaseScreen {
                 return count;
             }
             case 2: {
-                System.out.println("2 tap");
-                System.out.println(count);
                 swipeImage.remove();
                 swipeText.remove();
                 stageTutorial.addActor(canReachText);
                 return count;
             }
             case 3: {
-                System.out.println(count);
                 canReachText.remove();
                 stageTutorial.dispose();
                 stageTutorial = null;
@@ -305,26 +301,12 @@ public class GameScreen extends BaseScreen {
         return 0;
     }
 
-    public void movePlayer() {
-        if (!player.animated && !player.isDead()) {
-            game.score.add(1);
-            font.setText(game.score);
-            System.out.println("Score = " + game.score);
-            player.move();
-            player.shouldJump = false;
-        }
+    public void addScore(int amount){
+        game.score.add(amount);
+        font.setText(game.score);
     }
 
-    public void jumpPlayer() {
-        if (!player.animated && player.shouldJump && !player.isDead()) {
-            game.score.add(2);
-            font.setText(game.score);
-            System.out.println("Score = " + game.score);
-            player.jump();
-        }
-    }
-
-    public void stopPlayer() {
-        player.shouldJump = true;
+    public PlayerSquare getPlayer() {
+        return player;
     }
 }

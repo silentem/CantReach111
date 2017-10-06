@@ -163,7 +163,7 @@ public class EnemySquare extends Actor {
         return ENEMY_HEIGHT * view.vCount;
     }
 
-    public void win() {
+    public void lose() {
         stop();
         addAction(forever(Actions.rotateTo(360, .5f)));
     }
