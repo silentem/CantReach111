@@ -19,6 +19,6 @@ public class MusicActorGestureListener extends ActorGestureListener {
 
     @Override
     public void tap(InputEvent event, float x, float y, int count, int button) {
-        menuScreen.playMusic();
+        menuScreen.playPauseMusic();
     }
 }

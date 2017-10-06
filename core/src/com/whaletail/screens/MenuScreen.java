@@ -1,7 +1,6 @@
 package com.whaletail.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -194,7 +193,7 @@ public class MenuScreen extends BaseScreen {
         numberFont.setY(reachFont.getY() - reachFont.getHeight());
     }
 
-    public void playMusic() {
+    public void playPauseMusic() {
         if (backgroundMusic.isPlaying()) {
             game.prefs.putBoolean("play-music", false);
             game.prefs.flush();

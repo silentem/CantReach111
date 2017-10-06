@@ -1,7 +1,6 @@
 package com.whaletail.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -10,16 +9,18 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
-import com.badlogic.gdx.utils.compression.lzma.Base;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.whaletail.CantReachGame;
+import com.whaletail.actors.EnemySquare;
 import com.whaletail.gui.Button;
 import com.whaletail.gui.Text;
 import com.whaletail.gui.ViewActor;
-import com.whaletail.actors.EnemySquare;
 
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.forever;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.moveTo;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.scaleTo;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 import static com.whaletail.Constants.CAN_NOT;
 import static com.whaletail.Constants.NUMBER;
 import static com.whaletail.Constants.REACH;
@@ -32,21 +33,9 @@ import static com.whaletail.Constants.REACH;
 public class LossScreen extends BaseScreen {
 
     private CantReachGame game;
-    private Image background;
-    private Image againButton;
-    private Button homeButton;
-    private Text scoreText;
-    private Text bestScoreText;
     private OrthographicCamera cam;
     private Stage stage;
     private Stage stageHUD;
-
-    private ViewActor view1;
-    private ViewActor view2;
-
-    private Text canNotText;
-    private Text reachText;
-    private Text numberText;
 
     public LossScreen(CantReachGame game) {
         this.game = game;
@@ -66,29 +55,29 @@ public class LossScreen extends BaseScreen {
 
         Gdx.input.setInputProcessor(stage);
 
-        background = new Image(game.asset.get("background.png", Texture.class));
+        Image background = new Image(game.asset.get("background.png", Texture.class));
 
-        canNotText = new Text(CAN_NOT, game.font90);
+        Text canNotText = new Text(CAN_NOT, game.font90);
         canNotText.setX(game.cam.position.x - canNotText.getWidth() / 2 - 50);
         canNotText.setY(game.cam.viewportHeight - 50);
 
-        reachText = new Text(REACH, game.font90);
+        Text reachText = new Text(REACH, game.font90);
         reachText.setX(game.cam.position.x - canNotText.getWidth() / 2);
         reachText.setY(canNotText.getY() - canNotText.getHeight());
 
-        numberText = new Text(NUMBER, game.font90);
+        Text numberText = new Text(NUMBER, game.font90);
         numberText.setX(game.cam.position.x - canNotText.getWidth() / 2 + 50);
         numberText.setY(reachText.getY() - reachText.getHeight());
 
-        scoreText = new Text("Your score: " + game.score, game.font30);
+        Text scoreText = new Text("Your score: " + game.score, game.font30);
         scoreText.setX(cam.position.x - scoreText.getWidth() / 2);
         scoreText.setY(numberText.getY() - numberText.getHeight() - 50);
 
-        bestScoreText = new Text("Your best score: " + game.prefs.getInteger("best_score", 0), game.font30);
+        Text bestScoreText = new Text("Your best score: " + game.prefs.getInteger("best_score", 0), game.font30);
         bestScoreText.setX(cam.position.x - bestScoreText.getWidth() / 2);
         bestScoreText.setY(scoreText.getY() - scoreText.getHeight() - 50);
 
-        againButton = new Image(game.asset.get("againButton.png", Texture.class));
+        Image againButton = new Image(game.asset.get("againButton.png", Texture.class));
         againButton.setPosition(cam.position.x - againButton.getWidth() / 2,
                 cam.position.y / 2 - againButton.getHeight() / 2);
         againButton.addListener(new ActorGestureListener() {
@@ -106,7 +95,7 @@ public class LossScreen extends BaseScreen {
                                 scaleTo(.5f, .5f, .55f))));
 
 
-        homeButton = new Button(game.asset.get("homeButton.png", Texture.class));
+        Button homeButton = new Button(game.asset.get("homeButton.png", Texture.class));
         homeButton.setPosition(10,
                 cam.viewportHeight - homeButton.getHeight() - 50);
         homeButton.addListener(new ActorGestureListener() {
@@ -114,11 +103,10 @@ public class LossScreen extends BaseScreen {
             public void tap(InputEvent event, float x, float y, int count, int button) {
                 game.setScreen(game.menuScreen);
             }
-
         });
 
         EnemySquare.View view = new EnemySquare.View(game.asset.get("enemy-1.png", Texture.class), 30, 2);
-        view1 = new ViewActor(
+        ViewActor view1 = new ViewActor(
                 new Vector2(0, scoreText.getY() - 5 - scoreText.getHeight()),
                 view) {
             @Override
@@ -128,7 +116,7 @@ public class LossScreen extends BaseScreen {
         };
 
         view = new EnemySquare.View(game.asset.get("enemy-2.png", Texture.class), 30, 2);
-        view2 = new ViewActor(
+        ViewActor view2 = new ViewActor(
                 new Vector2(0, bestScoreText.getY() - 5 - bestScoreText.getHeight()),
                 view) {
             @Override
