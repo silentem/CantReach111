@@ -2,42 +2,30 @@ package com.whaletail.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
-import com.whaletail.Constants;
 import com.whaletail.WhaleGdxGame;
 import com.whaletail.gui.Score;
 import com.whaletail.gui.Text;
 import com.whaletail.sprites.EnemySquare;
 import com.whaletail.sprites.PlayerSquare;
 
-import java.util.ArrayList;
-
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha;
 import static com.whaletail.Constants.PPM;
 import static com.whaletail.sprites.EnemySquare.ENEMY_SPACE;
 
@@ -96,10 +84,10 @@ public class PlayScreen implements Screen {
             final Label canReachText = new Label(CAN_REACH_TUT, ls);
             tapImage.setPosition(stage.getWidth() / 2 - tapImage.getWidth() / 2, stage.getHeight() / 2 - tapImage.getHeight() / 2);
             tapText.setX(stage.getWidth() / 2 - tapText.getWidth() / 2);
-            tapText.setY(tapImage.getY()- tapText.getHeight() - 50);
+            tapText.setY(tapImage.getY() - tapText.getHeight() - 50);
             swipeImage.setPosition(stage.getWidth() / 2 - swipeImage.getWidth() / 2, stage.getHeight() / 2 - swipeImage.getHeight() / 2);
             swipeText.setX(stage.getWidth() / 2 - swipeText.getWidth() / 2);
-            swipeText.setY(swipeImage.getY()- swipeText.getHeight() - 50);
+            swipeText.setY(swipeImage.getY() - swipeText.getHeight() - 50);
             canReachText.setPosition(stage.getWidth() / 2 - canReachText.getWidth() / 2,
                     stage.getHeight() / 2 - canReachText.getHeight() / 2);
             stageTutorial.addActor(tapImage);
@@ -178,7 +166,6 @@ public class PlayScreen implements Screen {
             public void tap(InputEvent event, float x, float y, int count, int button) {
                 if (!player.animated && !player.isDead()) {
                     game.score.add(1);
-                    win();
                     font.setText(game.score);
                     System.out.println("Score = " + game.score);
                     player.move();
