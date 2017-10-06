@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.physics.box2d.World;
 import com.whaletail.gui.Score;
 import com.whaletail.screens.GameScreen;
+import com.whaletail.screens.LevelMenuScreen;
 import com.whaletail.screens.LoadingScreen;
 import com.whaletail.screens.LossScreen;
 import com.whaletail.screens.MenuScreen;
@@ -32,6 +33,7 @@ public class CantReachGame extends Game {
     public MenuScreen menuScreen;
     public GameScreen gameScreen;
     public LossScreen lossScreen;
+    public LevelMenuScreen levelMenuScreen;
 
     @Override
     public void create() {
@@ -45,6 +47,7 @@ public class CantReachGame extends Game {
         menuScreen = new MenuScreen(this);
         gameScreen = new GameScreen(this);
         lossScreen = new LossScreen(this);
+        levelMenuScreen = new LevelMenuScreen(this);
 
         initFonts();
 
@@ -62,6 +65,7 @@ public class CantReachGame extends Game {
         menuScreen.dispose();
         gameScreen.dispose();
         lossScreen.dispose();
+        levelMenuScreen.dispose();
     }
 
     private void initFonts() {

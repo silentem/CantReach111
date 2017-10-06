@@ -16,7 +16,7 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.moveTo;
 public class ViewActor extends Actor {
 
     protected Vector2 direction;
-    protected EnemySquare.View view;
+    private EnemySquare.View view;
 
     public ViewActor(Vector2 position,
               Vector2 direction,
@@ -26,8 +26,8 @@ public class ViewActor extends Actor {
         setPosition(position.x, position.y);
     }
 
-    public ViewActor(Vector2 position,
-              EnemySquare.View view) {
+    protected ViewActor(Vector2 position,
+                        EnemySquare.View view) {
         this.view = view;
         setPosition(position.x, position.y);
     }
@@ -43,10 +43,6 @@ public class ViewActor extends Actor {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         view.draw(batch, getX(), getY());
-    }
-
-    void dispose() {
-        view.dispose();
     }
 
     @Override

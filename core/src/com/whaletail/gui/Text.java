@@ -22,9 +22,7 @@ public class Text extends Actor {
 
     public Text(String text, BitmapFont font) {
         this.text = text;
-        long start = System.currentTimeMillis();
         this.font = font;
-        System.out.println(System.currentTimeMillis() - start);
         glyphLayout = new GlyphLayout(font, text);
     }
 

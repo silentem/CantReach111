@@ -195,7 +195,7 @@ public class EnemySquare extends Actor {
             return texturePattern.getHeight() * vCount;
         }
 
-        public void dispose() {
+        void dispose() {
             texturePattern.dispose();
         }
     }
