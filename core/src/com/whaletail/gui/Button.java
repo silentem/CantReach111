@@ -3,16 +3,15 @@ package com.whaletail.gui;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 /**
  * @author Whaletail
  * @email silentem1113@gmail.com
  */
 
-public class Button extends Actor {
+public class Button extends Image {
 
     private Texture texture;
     private Sprite sprite;
@@ -20,16 +19,10 @@ public class Button extends Actor {
     private float y;
 
     public Button(Texture texture) {
-        this(texture, 0, 0);
-    }
-
-    private Button(Texture texture, float x, float y) {
+        super(texture);
         this.texture = texture;
         sprite = new Sprite(texture);
-        this.x = x;
-        this.y = y;
         setTouchable(Touchable.enabled);
-        setBounds(x, y, texture.getWidth(), texture.getHeight());
     }
 
     @Override
@@ -54,19 +47,9 @@ public class Button extends Actor {
     }
 
     @Override
-    public float getX() {
-        return x;
-    }
-
-    @Override
     public void setX(float x) {
         setBounds(x, y, getWidth(), getHeight());
         this.x = x;
-    }
-
-    @Override
-    public float getY() {
-        return y;
     }
 
     @Override

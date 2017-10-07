@@ -159,7 +159,7 @@ public class MenuScreen extends BaseScreen {
                     new Runnable() {
                         @Override
                         public void run() {
-                            game.setScreen(game.gameScreen);
+                            game.setScreen(game.levelMenuScreen);
                         }
                     })));
         }

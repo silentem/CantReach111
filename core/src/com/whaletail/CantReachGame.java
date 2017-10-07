@@ -27,6 +27,7 @@ public class CantReachGame extends Game {
 
     public BitmapFont font90;
     public BitmapFont font30;
+    public BitmapFont font20;
 
     public Score score;
 
@@ -71,6 +72,8 @@ public class CantReachGame extends Game {
     private void initFonts() {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Roboto-Medium.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter params = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        params.size = 20;
+        font20 = generator.generateFont(params);
         params.size = 30;
         font30 = generator.generateFont(params);
         params.size = 90;
