@@ -6,7 +6,6 @@ import android.widget.RelativeLayout;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
-import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
@@ -14,8 +13,6 @@ import com.google.android.gms.ads.MobileAds;
 
 public class AndroidLauncher extends AndroidApplication {
 
-
-    private AdView adView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,14 +25,8 @@ public class AndroidLauncher extends AndroidApplication {
 
         RelativeLayout relativeLayout = new RelativeLayout(this);
         View viewGame = initializeForView(new CantReachGame(), config);
-        adView = new AdView(this);
 
-        adView.setAdListener(new AdListener() {
-            @Override
-            public void onAdLoaded() {
-
-            }
-        });
+        AdView adView = new AdView(this);
 
         adView.setAdSize(AdSize.SMART_BANNER);
         adView.setAdUnitId("ca-app-pub-8186248102983118/1715636775");
@@ -46,9 +37,11 @@ public class AndroidLauncher extends AndroidApplication {
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT
         );
-
+        adParams.addRule(RelativeLayout.BELOW, viewGame.getId());
+        adParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        adView.setLayoutParams(adParams);
         relativeLayout.addView(viewGame);
-        relativeLayout.addView(adView, adParams);
+        relativeLayout.addView(adView);
         adView.loadAd(builder.build());
 
         setContentView(relativeLayout);
