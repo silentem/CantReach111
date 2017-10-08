@@ -5,6 +5,9 @@ import com.google.gson.annotations.SerializedName;
 
 public class Obstacle {
 
+    @SerializedName("id")
+    @Expose
+    private Integer id;
     @SerializedName("width")
     @Expose
     private RandomValue width;
@@ -20,6 +23,14 @@ public class Obstacle {
     @SerializedName("speed")
     @Expose
     private Integer speed;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public RandomValue getWidth() {
         return width;
