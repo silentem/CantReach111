@@ -17,6 +17,9 @@ public class Obstacle {
     @SerializedName("movement")
     @Expose
     private Integer movement;
+    @SerializedName("speed")
+    @Expose
+    private Integer speed;
 
     public RandomValue getWidth() {
         return width;
@@ -63,4 +66,11 @@ public class Obstacle {
         this.movement = movement;
     }
 
+    public Integer getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(Integer speed) {
+        this.speed = speed;
+    }
 }
