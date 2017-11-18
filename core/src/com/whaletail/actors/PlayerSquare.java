@@ -18,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
 import com.whaletail.CantReachGame;
+import com.whaletail.actors.v1.EnemySquare;
 
 import java.util.Random;
 
@@ -26,7 +27,7 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.run;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.scaleTo;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 import static com.whaletail.Constants.PPM;
-import static com.whaletail.actors.EnemySquare.ENEMY_SPACE;
+import static com.whaletail.actors.v0.EnemySquare.ENEMY_SPACE;
 
 /**
  * @author Whaletail

@@ -1,7 +1,7 @@
 package com.whaletail.gui;
 
 import com.badlogic.gdx.math.Vector2;
-import com.whaletail.actors.EnemySquare;
+import com.whaletail.actors.v0.EnemySquare;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.delay;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.moveTo;

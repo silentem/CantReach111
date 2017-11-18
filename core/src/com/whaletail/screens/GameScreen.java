@@ -1,6 +1,7 @@
 package com.whaletail.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -16,20 +17,25 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.google.gson.Gson;
 import com.whaletail.CantReachGame;
-import com.whaletail.actors.EnemySquare;
 import com.whaletail.actors.PlayerSquare;
+import com.whaletail.actors.v1.EnemySquare;
 import com.whaletail.gui.Score;
 import com.whaletail.gui.Text;
 import com.whaletail.listeners.GameActorGestureListener;
 import com.whaletail.listeners.TutorialActorGestureListener;
+import com.whaletail.model.Level;
+import com.whaletail.model.Line;
+import com.whaletail.model.Obstacle;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha;
 import static com.whaletail.Constants.CAN_REACH_TUT;
 import static com.whaletail.Constants.GRAVITY;
+import static com.whaletail.Constants.PPM;
 import static com.whaletail.Constants.SWIPE_TUT;
 import static com.whaletail.Constants.TAP_TUT;
-import static com.whaletail.actors.EnemySquare.ENEMY_SPACE;
+import static com.whaletail.actors.v0.EnemySquare.GAP;
 
 /**
  * @author Whaletail
@@ -43,8 +49,6 @@ public class GameScreen extends BaseScreen {
     private PlayerSquare player;
     private Array<EnemySquare> enemySquares;
     private Text font;
-    private static final int MAX_SIZE = 16;
-    private EnemySquare last;
     private Box2DDebugRenderer b2dr;
     private Stage stage;
     private Stage stageHUD;
@@ -87,16 +91,23 @@ public class GameScreen extends BaseScreen {
         stage.addActor(background);
         background.setZIndex(0);
         stage.addActor(player);
-        int speed = 0;
-        for (int i = 0; i < MAX_SIZE; i++) {
-            speed = getRandomSpeed(speed);
-            EnemySquare enemySquare = new EnemySquare(
-                    player.getY() + ENEMY_SPACE + i * ENEMY_SPACE, speed, gameCam.viewportWidth, game);
+        Gson gson = new Gson();
+        FileHandle handle = Gdx.files.internal("level.json");
+        String string = handle.readString();
+        Level level = gson.fromJson(string, Level.class);
+        float y = 0;
+        for (Line line : level.getLines()) {
+            Obstacle obstacle = line.getVariants().get(MathUtils.random(line.getVariants().size() - 1)).getObstacle();
+            if (enemySquares.size == 0) {
+                y = 200;
+            } else {
+                y += GAP * 2 + enemySquares.get(enemySquares.size - 1).getHeight();
+            }
+            EnemySquare enemySquare = new EnemySquare(obstacle, game).createNew(y);
             enemySquares.add(enemySquare);
             stage.addActor(enemySquare);
         }
         stageHUD.addActor(font);
-        last = enemySquares.get(MAX_SIZE - 1);
         stage.addListener(new GameActorGestureListener(this));
     }
 
@@ -195,7 +206,7 @@ public class GameScreen extends BaseScreen {
             stageTutorial.act(delta);
             stageTutorial.draw();
         }
-//        b2dr.render(game.world, gameCam.combined.scl(PPM));
+        b2dr.render(game.world, gameCam.combined.scl(PPM));
 
     }
 
@@ -207,10 +218,6 @@ public class GameScreen extends BaseScreen {
             win();
         }
         for (EnemySquare enemySquare : enemySquares) {
-            if (enemySquare.getY() < gameCam.position.y - gameCam.viewportHeight / 2) {
-                enemySquare.createNew(last.getY() + last.getHeight() + ENEMY_SPACE - last.getHeight(), getRandomSpeed(last.getSpeed()));
-                last = enemySquare;
-            }
             if (enemySquare.getX() - enemySquare.getWidth() / 2 > gameCam.viewportWidth && enemySquare.isRightLeft()) {
                 enemySquare.reset();
             } else if (enemySquare.getX() < 0 - enemySquare.getWidth() && !enemySquare.isRightLeft()) {
@@ -218,7 +225,6 @@ public class GameScreen extends BaseScreen {
             }
             if (player.collides(enemySquare)) {
                 lose();
-
             }
             if (player.isDead()) {
                 enemySquare.stop();
@@ -301,7 +307,7 @@ public class GameScreen extends BaseScreen {
         return 0;
     }
 
-    public void addScore(int amount){
+    public void addScore(int amount) {
         game.score.add(amount);
         font.setText(game.score.toString());
     }

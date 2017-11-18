@@ -1,4 +1,4 @@
-package com.whaletail.actors;
+package com.whaletail.actors.v1;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -7,13 +7,14 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Timer;
 import com.whaletail.CantReachGame;
+import com.whaletail.model.Movement;
+import com.whaletail.model.Obstacle;
 
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.forever;
 import static com.whaletail.Constants.PPM;
 
 /**
@@ -31,20 +32,25 @@ public class EnemySquare extends Actor {
     private View view;
     private int speed;
     private boolean rightLeft;
-    private float maxWidth;
     private CantReachGame game;
-    private World world;
     private Body body;
+    private int height;
+    private int width;
+    private Movement movement;
 
-    public EnemySquare(float y, int speed, float maxWidth, CantReachGame game) {
-        this.speed = speed;
-        this.maxWidth = maxWidth;
+    public EnemySquare(Obstacle obstacle, CantReachGame game) {
+        height = random(obstacle.getHeight().getFrom(), obstacle.getHeight().getTo());
+        width = random(obstacle.getWidth().getFrom(), obstacle.getWidth().getTo());
+        movement = obstacle.getMovement();
+        speed = obstacle.getSpeed();
         this.game = game;
-        world = game.world;
-        createNew(y, speed);
     }
 
-    public void createNew(float y, int speed) {
+    private int random(int from, int to) {
+        return MathUtils.random(to - from) + from;
+    }
+
+    public EnemySquare createNew(float y) {
         rightLeft = MathUtils.randomBoolean();
         createView(speed);
         createBody();
@@ -52,25 +58,24 @@ public class EnemySquare extends Actor {
             setPosition(0 - getWidth() - MathUtils.random(200), y);
             body.setLinearVelocity(speed, body.getLinearVelocity().y);
         } else {
-            setPosition(maxWidth + MathUtils.random(200), y);
+            setPosition(game.cam.viewportWidth + MathUtils.random(200), y);
             body.setLinearVelocity(-speed, body.getLinearVelocity().y);
         }
+        return this;
     }
 
     private void createView(int speed) {
-        int vCount = MathUtils.random(3) + 1;
-        int hCount = MathUtils.random(12) + 5;
         Texture pattern;
         if (MathUtils.random(10) == 9) {
             pattern = game.asset.get("enemy-4.png", Texture.class);
-        } else if (speed <= 5 && speed <=7) {
+        } else if (speed <= 5 && speed <= 7) {
             pattern = game.asset.get("enemy-1.png", Texture.class);
         } else if (speed >= 7) {
             pattern = game.asset.get("enemy-2.png", Texture.class);
         } else {
             pattern = game.asset.get("enemy-3.png", Texture.class);
         }
-        view = new View(pattern, hCount, vCount);
+        view = new View(pattern, width, height);
     }
 
     private void createBody() {
@@ -82,7 +87,7 @@ public class EnemySquare extends Actor {
         fixtureDef.shape = shape;
         fixtureDef.density = 1f;
         if (body == null) {
-            body = world.createBody(def);
+            body = game.world.createBody(def);
         } else {
             body.destroyFixture(body.getFixtureList().get(0));
         }
@@ -101,7 +106,7 @@ public class EnemySquare extends Actor {
         if (rightLeft) {
             setPosition(0 - getWidth(), body.getPosition().y * PPM);
         } else {
-            setPosition(maxWidth + getWidth() / 2, body.getPosition().y * PPM);
+            setPosition(game.cam.viewportWidth + getWidth() / 2, body.getPosition().y * PPM);
         }
     }
 
@@ -154,13 +159,13 @@ public class EnemySquare extends Actor {
 
     @Override
     public float getWidth() {
-        return ENEMY_WIDTH * view.hCount;
+        return ENEMY_WIDTH * width;
     }
 
 
     @Override
     public float getHeight() {
-        return ENEMY_HEIGHT * view.vCount;
+        return ENEMY_HEIGHT * height;
     }
 
     public void lose() {

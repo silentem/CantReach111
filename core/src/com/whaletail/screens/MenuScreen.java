@@ -12,7 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.whaletail.CantReachGame;
-import com.whaletail.actors.EnemySquare;
+import com.whaletail.actors.v0.EnemySquare;
 import com.whaletail.gui.Button;
 import com.whaletail.gui.MenuScreenViewActor;
 import com.whaletail.gui.Text;
@@ -29,7 +29,7 @@ import static com.whaletail.CantReachGame.V_WIDTH;
 import static com.whaletail.Constants.CAN_NOT;
 import static com.whaletail.Constants.NUMBER;
 import static com.whaletail.Constants.REACH;
-import static com.whaletail.actors.EnemySquare.ENEMY_SPACE;
+import static com.whaletail.actors.v0.EnemySquare.ENEMY_SPACE;
 
 /**
  * @author Whaletail

@@ -12,7 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.whaletail.CantReachGame;
-import com.whaletail.actors.EnemySquare;
+import com.whaletail.actors.v0.EnemySquare;
 import com.whaletail.gui.Button;
 import com.whaletail.gui.Text;
 import com.whaletail.gui.ViewActor;
