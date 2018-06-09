@@ -69,6 +69,8 @@ public class LossScreen extends BaseScreen {
         numberText.setX(game.cam.position.x - canNotText.getWidth() / 2 + 50);
         numberText.setY(reachText.getY() - reachText.getHeight());
 
+        game.analytic.submitScore(game.score.getScore());
+
         Text scoreText = new Text("Your score: " + game.score, game.font30);
         scoreText.setX(cam.position.x - scoreText.getWidth() / 2);
         scoreText.setY(numberText.getY() - numberText.getHeight() - 50);
@@ -84,6 +86,8 @@ public class LossScreen extends BaseScreen {
             @Override
             public void tap(InputEvent event, float x, float y, int count, int button) {
                 game.setScreen(game.gameScreen);
+                game.tries++;
+                game.analytic.pressedRetry(game.tries);
             }
         });
         againButton.setOrigin(againButton.getWidth() / 2, againButton.getHeight() / 2);
@@ -102,6 +106,7 @@ public class LossScreen extends BaseScreen {
             @Override
             public void tap(InputEvent event, float x, float y, int count, int button) {
                 game.setScreen(game.menuScreen);
+                game.analytic.goneHome();
             }
         });
 

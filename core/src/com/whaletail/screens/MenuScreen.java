@@ -111,6 +111,7 @@ public class MenuScreen extends BaseScreen {
     }
 
     public void startGame() {
+        game.analytic.pressedPlay();
         for (int i = 0; i < 6; i++) {
             int y = 10 + ENEMY_SPACE + i * ENEMY_SPACE;
             EnemySquare.View view = new EnemySquare.View(game.asset.get("enemy-" + (MathUtils.random(3) + 1) + ".png", Texture.class), MathUtils.random(5) + 5, MathUtils.random(3) + 1);
@@ -199,11 +200,13 @@ public class MenuScreen extends BaseScreen {
             game.prefs.flush();
             musicButton.setDrawable(new SpriteDrawable(new Sprite(game.asset.get("noMusicButton.png", Texture.class))));
             backgroundMusic.pause();
+            game.analytic.turnedOffMusic();
         } else {
             game.prefs.putBoolean("play-music", true);
             game.prefs.flush();
             musicButton.setDrawable(new SpriteDrawable(new Sprite(game.asset.get("musicButton.png", Texture.class))));
             backgroundMusic.play();
+            game.analytic.turnedOnMusic();
         }
     }
 }

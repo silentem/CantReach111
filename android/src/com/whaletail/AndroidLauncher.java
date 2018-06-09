@@ -12,6 +12,7 @@ import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.whaletail.analytics.Analytic;
 
 public class AndroidLauncher extends AndroidApplication {
 
@@ -30,7 +31,50 @@ public class AndroidLauncher extends AndroidApplication {
         config.useCompass = false;
 
         RelativeLayout relativeLayout = new RelativeLayout(this);
-        View viewGame = initializeForView(new CantReachGame(), config);
+        View viewGame = initializeForView(new CantReachGame(new Analytic() {
+            @Override
+            public void submitScore(int score) {
+                Bundle params = new Bundle();
+                params.putString("score", String.valueOf(score));
+                mFirebaseAnalytics.logEvent("reached_score", params);
+            }
+
+            @Override
+            public void turnedOnMusic() {
+                Bundle params = new Bundle();
+                params.putBoolean("music", true);
+                mFirebaseAnalytics.logEvent("turn_on_music", params);
+            }
+
+            @Override
+            public void turnedOffMusic() {
+                Bundle params = new Bundle();
+                params.putBoolean("music", false);
+                mFirebaseAnalytics.logEvent("turn_off_music", params);
+            }
+
+            @Override
+            public void goneHome() {
+                Bundle params = new Bundle();
+                params.putString("nav", "home");
+                mFirebaseAnalytics.logEvent("navigation", params);
+            }
+
+            @Override
+            public void pressedPlay() {
+                Bundle params = new Bundle();
+                params.putString("nav", "play");
+                mFirebaseAnalytics.logEvent("navigation", params);
+            }
+
+            @Override
+            public void pressedRetry(int tries) {
+                Bundle params = new Bundle();
+                params.putString("nav", "retry");
+                params.putInt("tries", tries);
+                mFirebaseAnalytics.logEvent("navigation", params);
+            }
+        }), config);
         adView = new AdView(this);
 
         adView.setAdListener(new AdListener() {
