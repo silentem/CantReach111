@@ -24,6 +24,9 @@ import com.whaletail.gui.Text;
 import com.whaletail.listeners.GameActorGestureListener;
 import com.whaletail.listeners.TutorialActorGestureListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha;
 import static com.whaletail.Constants.CAN_REACH_TUT;
 import static com.whaletail.Constants.GRAVITY;
@@ -42,7 +45,7 @@ public class GameScreen extends BaseScreen {
     private CantReachGame game;
     private OrthographicCamera gameCam;
     private PlayerSquare player;
-    private Array<EnemySquare> enemySquares;
+    private List<EnemySquare> enemySquares;
     private Text font;
     private static final int MAX_SIZE = 16;
     private EnemySquare last;
@@ -75,7 +78,7 @@ public class GameScreen extends BaseScreen {
         }
         game.world = new World(new Vector2(0, 0), true);
         player = new PlayerSquare(game, gameCam, stage.getViewport().getWorldWidth() / 2, 64);
-        enemySquares = new Array<>();
+        enemySquares = new ArrayList<>();
         game.score = new Score();
         font = new Text(game.score.toString(), game.font30, stage);
         Image background = new Image(game.asset.get("background.png", Texture.class)) {
