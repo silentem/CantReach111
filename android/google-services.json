@@ -1,0 +1,59 @@
+{
+  "project_info": {
+    "project_number": "86763346284",
+    "firebase_url": "https://can-t-reach-111.firebaseio.com",
+    "project_id": "can-t-reach-111",
+    "storage_bucket": "can-t-reach-111.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:86763346284:android:bf8b1b6b294bddef",
+        "android_client_info": {
+          "package_name": "com.whaletail"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "86763346284-06t009kl8ns7i79ob9mvs93n48411s68.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.whaletail",
+            "certificate_hash": "0c5aef4f613f529e0be0bdf4a5ffd025eb298d71"
+          }
+        },
+        {
+          "client_id": "86763346284-t1e3cg1dbh9ierdjh67ebkrevdtdbjh3.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "86763346284-t1e3cg1dbh9ierdjh67ebkrevdtdbjh3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzw5ecRo4ZMZr0cTah3Xc0BRZQ-roz4VU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "86763346284-t1e3cg1dbh9ierdjh67ebkrevdtdbjh3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

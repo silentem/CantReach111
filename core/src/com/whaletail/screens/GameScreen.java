@@ -27,6 +27,7 @@ import com.whaletail.listeners.TutorialActorGestureListener;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha;
 import static com.whaletail.Constants.CAN_REACH_TUT;
 import static com.whaletail.Constants.GRAVITY;
+import static com.whaletail.Constants.PPM;
 import static com.whaletail.Constants.SWIPE_TUT;
 import static com.whaletail.Constants.TAP_TUT;
 import static com.whaletail.actors.EnemySquare.ENEMY_SPACE;
@@ -125,9 +126,6 @@ public class GameScreen extends BaseScreen {
 
         stageTutorial.addListener(new TutorialActorGestureListener(this));
 
-        game.prefs.putBoolean("tutorial_passed", true);
-        game.prefs.flush();
-        isTutorialPassed = true;
     }
 
 
@@ -291,6 +289,9 @@ public class GameScreen extends BaseScreen {
             case 3: {
                 canReachText.remove();
                 stageTutorial.dispose();
+                game.prefs.putBoolean("tutorial_passed", true);
+                game.prefs.flush();
+                isTutorialPassed = true;
                 stageTutorial = null;
                 stage.addAction(alpha(1f));
                 stageHUD.addAction(alpha(1f));
@@ -301,7 +302,7 @@ public class GameScreen extends BaseScreen {
         return 0;
     }
 
-    public void addScore(int amount){
+    public void addScore(int amount) {
         game.score.add(amount);
         font.setText(game.score.toString());
     }

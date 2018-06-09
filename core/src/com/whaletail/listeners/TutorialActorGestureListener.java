@@ -21,6 +21,6 @@ public class TutorialActorGestureListener extends ActorGestureListener {
 
     @Override
     public void tap(InputEvent event, float x, float y, int count, int button) {
-        this.count = gameScreen.tapThroughTutorial(this.count++);
+        this.count = gameScreen.tapThroughTutorial(++this.count);
     }
 }
