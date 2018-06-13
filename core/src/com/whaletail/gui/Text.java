@@ -5,13 +5,14 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 
 /**
  * @author Whaletail
  * @email silentem1113@gmail.com
  */
 
-public class Text extends Actor {
+public class Text extends Widget {
 
     private String text;
     private BitmapFont font;

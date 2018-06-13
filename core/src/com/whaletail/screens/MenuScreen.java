@@ -21,11 +21,14 @@ import com.whaletail.listeners.MenuActorGestureListener;
 import com.whaletail.listeners.MusicActorGestureListener;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.delay;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.forever;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.moveTo;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.run;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.scaleTo;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 import static com.whaletail.CantReachGame.V_HEIGHT;
 import static com.whaletail.CantReachGame.V_WIDTH;
+import static com.whaletail.Constants.ANNOUNCEMENT;
 import static com.whaletail.Constants.CAN_NOT;
 import static com.whaletail.Constants.NUMBER;
 import static com.whaletail.Constants.REACH;
@@ -41,6 +44,7 @@ public class MenuScreen extends BaseScreen {
     private Text canNotFont;
     private Text reachFont;
     private Text numberFont;
+    private Text announcementFont;
 
     private CantReachGame game;
     private Button playButton;
@@ -80,6 +84,7 @@ public class MenuScreen extends BaseScreen {
         stage.addActor(canNotFont);
         stage.addActor(reachFont);
         stage.addActor(numberFont);
+        stage.addActor(announcementFont);
         stage.addActor(playButton);
 
         for (ViewActor viewActor : viewActors) {
@@ -192,6 +197,15 @@ public class MenuScreen extends BaseScreen {
         numberFont = new Text(NUMBER, game.font90);
         numberFont.setX(game.cam.position.x - canNotFont.getWidth() / 2 + 50);
         numberFont.setY(reachFont.getY() - reachFont.getHeight());
+        announcementFont = new Text(ANNOUNCEMENT, game.font30);
+        announcementFont.setX(game.cam.position.x - announcementFont.getWidth() / 2);
+        announcementFont.setY(numberFont.getY() - numberFont.getHeight() - 50);
+        announcementFont.addAction(
+                forever(
+                        sequence(
+                                scaleTo(.45f, .45f, .55f),
+                                scaleTo(.5f, .5f, .55f))));
+
     }
 
     public void playPauseMusic() {

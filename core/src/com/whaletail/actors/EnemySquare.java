@@ -12,8 +12,9 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Timer;
 import com.whaletail.CantReachGame;
+import com.whaletail.Util;
 
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.forever;
 import static com.whaletail.Constants.PPM;
 
 /**
@@ -61,17 +62,19 @@ public class EnemySquare extends Actor {
         int vCount = MathUtils.random(3) + 1;
         int hCount = MathUtils.random(12) + 5;
         Texture pattern;
-        if (MathUtils.random(10) == 9) {
-            pattern = game.asset.get("enemy-4.png", Texture.class);
-        } else if (speed <= 5 && speed <=7) {
+        int random = MathUtils.random(10);
+        if (Util.equals(random, 0, 1, 2)) {
             pattern = game.asset.get("enemy-1.png", Texture.class);
-        } else if (speed >= 7) {
+        } else if (Util.equals(random, 3, 4, 5)) {
             pattern = game.asset.get("enemy-2.png", Texture.class);
-        } else {
+        } else if (Util.equals(random, 6, 7, 8)) {
             pattern = game.asset.get("enemy-3.png", Texture.class);
+        } else {
+            pattern = game.asset.get("enemy-4.png", Texture.class);
         }
         view = new View(pattern, hCount, vCount);
     }
+
 
     private void createBody() {
         PolygonShape shape = new PolygonShape();
