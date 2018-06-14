@@ -49,6 +49,7 @@ public class PlayerSquare extends Actor {
     private Array<Shard> shards;
     private boolean invulnerable;
     public boolean animated;
+    private boolean lostLife;
     private World world;
     private Body body;
     private boolean dead;
@@ -184,7 +185,7 @@ public class PlayerSquare extends Actor {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         if (!isDead() && !overlaps) {
-            if (!isInvulnerable() || state == State.TELEPORTING) {
+            if (!lostLife) {
                 view.getImage().draw(batch, parentAlpha);
             } else {
                 if ((System.currentTimeMillis() % 100) <= 50) {
@@ -214,7 +215,7 @@ public class PlayerSquare extends Actor {
         Rectangle player = new Rectangle(body.getPosition().x * PPM - getWidth() / 2, body.getPosition().y * PPM - getHeight() / 2, getWidth(), getHeight());
         if (player.overlaps(enemy)) {
             overlaps = true;
-            return !isInvulnerable();
+            return !isInvulnerable() && !isLostLife();
         }
         overlaps = false;
         return false;
@@ -359,6 +360,14 @@ public class PlayerSquare extends Actor {
 
     public void setInvulnerable(boolean invulnerable) {
         this.invulnerable = invulnerable;
+    }
+
+    public boolean isLostLife() {
+        return lostLife;
+    }
+
+    public void setLostLife(boolean lostLife) {
+        this.lostLife = lostLife;
     }
 
     @Override

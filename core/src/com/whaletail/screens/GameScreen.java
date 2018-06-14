@@ -75,6 +75,7 @@ public class GameScreen extends BaseScreen {
         isTutorialPassed = game.prefs.getBoolean("tutorial_passed", false);
         if (!isTutorialPassed) {
             setupTutorial();
+            game.hasExtraLife = true;
         } else {
             Gdx.input.setInputProcessor(stage);
         }
@@ -262,14 +263,14 @@ public class GameScreen extends BaseScreen {
 
         game.prefs.putBoolean("extraLife", false);
         game.prefs.flush();
-        player.setInvulnerable(true);
+        player.setLostLife(true);
         float delay = 1f;
 
         Timer.schedule(new Timer.Task() {
 
             @Override
             public void run() {
-                player.setInvulnerable(false);
+                player.setLostLife(false);
             }
 
         }, delay);

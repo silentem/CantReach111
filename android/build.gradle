@@ -22,6 +22,21 @@ android {
         minSdkVersion 14
         targetSdkVersion 25
     }
+    signingConfigs {
+        config {
+            keyAlias 'cannotreach111'
+            keyPassword 'hillka3423'
+            storeFile file('/home/whaletail/w_key_store.jks')
+            storePassword 'hillka3423'
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.config
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
 }
 
 

@@ -110,8 +110,10 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
     private void loadRewardedVideoAd() {
         String productionAd = "ca-app-pub-8186248102983118/5801237239";
         String testAd = "ca-app-pub-3940256099942544/5224354917";
-        mRewardedVideoAd.loadAd(testAd,
-                new AdRequest.Builder().build());
+        mRewardedVideoAd.loadAd(productionAd,
+                new AdRequest.Builder()
+                        .addTestDevice("AE901101C564DAFE18B7BA29B1A6CA1A")
+                        .build());
     }
 
     @Override
@@ -136,6 +138,7 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
 
     @Override
     public void onRewarded(RewardItem rewardItem) {
+        loadRewardedVideoAd();
         if (onAdCallback != null) {
             onAdCallback.onAdWatched();
         }
@@ -148,7 +151,9 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
 
     @Override
     public void onRewardedVideoAdFailedToLoad(int i) {
-
+        if (i < 5) {
+            loadRewardedVideoAd();
+        }
     }
 
     @Override
