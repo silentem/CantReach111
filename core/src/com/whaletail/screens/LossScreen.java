@@ -124,6 +124,7 @@ public class LossScreen extends BaseScreen {
         };
 
 
+
         String extraLineFileName = "baseline_favorite_white_48.png";
         extraLifeImage = new Image(game.asset.get(extraLineFileName, Texture.class));
 
@@ -131,6 +132,12 @@ public class LossScreen extends BaseScreen {
 
         extraLifeImage.setHeight(50);
         extraLifeImage.setWidth(50);
+        final Image plusOne = new Image(game.asset.get("baseline_plus_one_white_48.png", Texture.class));
+
+        plusOne.setPosition(stage.getCamera().viewportWidth / 6 - 40, 75);
+
+        plusOne.setHeight(40);
+        plusOne.setWidth(40);
 
         extraLifeImage.addListener(new ActorGestureListener() {
             @Override
@@ -140,6 +147,7 @@ public class LossScreen extends BaseScreen {
                     public void onAdWatched() {
                         game.hasExtraLife = true;
                         extraLifeImage.remove();
+                        plusOne.remove();
                     }
                 });
             }
@@ -165,6 +173,7 @@ public class LossScreen extends BaseScreen {
         stage.addActor(view2);
         stage.addActor(scoreText);
         if (!game.hasExtraLife) {
+            stage.addActor(plusOne);
             stage.addActor(extraLifeImage);
         }
         stage.addActor(bestScoreText);

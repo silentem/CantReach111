@@ -99,6 +99,7 @@ public class LoadingScreen extends BaseScreen {
         game.asset.load("homeButton.png", Texture.class);
         game.asset.load("baseline_favorite_white_48.png", Texture.class);
         game.asset.load("baseline_favorite_border_white_48.png", Texture.class);
+        game.asset.load("baseline_plus_one_white_48.png", Texture.class);
     }
 
 }

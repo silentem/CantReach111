@@ -168,13 +168,13 @@ public class GameScreen extends BaseScreen {
             if (prev < 7) {
                 return MathUtils.random(1) + 4;
             } else {
-                return MathUtils.random(2) + 2;
+                return MathUtils.random(2) + 3;
             }
         } else if (60 < game.score.getScore()) {
             if (prev < 8) {
-                return MathUtils.random(1) + 5;
+                return MathUtils.random(2) + 6;
             } else {
-                return MathUtils.random(2) + 3;
+                return MathUtils.random(3) + 4;
             }
         }
         return speed;
