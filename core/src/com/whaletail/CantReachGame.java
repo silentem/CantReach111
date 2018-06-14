@@ -8,8 +8,9 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.physics.box2d.World;
-import com.whaletail.analytics.Analytic;
 import com.whaletail.gui.Score;
+import com.whaletail.interfaces.AdWatcher;
+import com.whaletail.interfaces.Analytic;
 import com.whaletail.screens.GameScreen;
 import com.whaletail.screens.LoadingScreen;
 import com.whaletail.screens.LossScreen;
@@ -32,14 +33,21 @@ public class CantReachGame extends Game {
 
     public int tries = 0;
 
+    public boolean hasExtraLife = true;
+
     public MenuScreen menuScreen;
     public GameScreen gameScreen;
     public LossScreen lossScreen;
 
     public Analytic analytic;
+    public AdWatcher adWatcher;
 
-    public CantReachGame(Analytic analytic) {
+    public CantReachGame(Analytic analytic, AdWatcher adWatcher) {
         this.analytic = analytic;
+        this.adWatcher = adWatcher;
+    }
+
+    public CantReachGame() {
     }
 
     @Override

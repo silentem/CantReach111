@@ -12,7 +12,6 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -28,9 +27,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.forever;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.scaleTo;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 import static com.whaletail.Constants.CAN_REACH_TUT;
 import static com.whaletail.Constants.GRAVITY;
-import static com.whaletail.Constants.PPM;
 import static com.whaletail.Constants.SWIPE_TUT;
 import static com.whaletail.Constants.TAP_TUT;
 import static com.whaletail.actors.EnemySquare.ENEMY_SPACE;
@@ -58,6 +59,7 @@ public class GameScreen extends BaseScreen {
     private Label canReachText;
     private Image tapImage;
     private Image swipeImage;
+    private Image extraLifeImage;
     private boolean isTutorialPassed;
 
     public GameScreen(CantReachGame game) {
@@ -99,7 +101,29 @@ public class GameScreen extends BaseScreen {
             enemySquares.add(enemySquare);
             stage.addActor(enemySquare);
         }
+
+
+        String extraLineFileName = "baseline_favorite_white_48.png";
+        extraLifeImage = new Image(game.asset.get(extraLineFileName, Texture.class)) {
+            @Override
+            public void draw(Batch batch, float parentAlpha) {
+                setPosition(0, stage.getCamera().position.y + stage.getHeight() / 2 - 50);
+                super.draw(batch, parentAlpha);
+            }
+        };
+
+        extraLifeImage.setHeight(50);
+        extraLifeImage.setWidth(50);
+
+        extraLifeImage.addAction(
+                forever(
+                        sequence(
+                                scaleTo(.90f, .90f, .55f),
+                                scaleTo(.95f, .95f, .55f))));
         stageHUD.addActor(font);
+        if (game.hasExtraLife) {
+            stageHUD.addActor(extraLifeImage);
+        }
         last = enemySquares.get(MAX_SIZE - 1);
         stage.addListener(new GameActorGestureListener(this));
     }
@@ -218,7 +242,23 @@ public class GameScreen extends BaseScreen {
                 enemySquare.reset();
             }
             if (player.collides(enemySquare)) {
-                lose();
+                if (game.hasExtraLife) {
+                    game.hasExtraLife = false;
+                    extraLifeImage.remove();
+                    player.setInvulnerable(true);
+                    float delay = 1f;
+
+                    Timer.schedule(new Timer.Task() {
+
+                        @Override
+                        public void run() {
+                            player.setInvulnerable(false);
+                        }
+
+                    }, delay);
+                } else  {
+                    lose();
+                }
 
             }
             if (player.isDead()) {
@@ -267,7 +307,9 @@ public class GameScreen extends BaseScreen {
         System.out.println("GameScreen.dispose");
         stageHUD.dispose();
         stage.dispose();
-        player.dispose();
+        if (player != null) {
+            player.dispose();
+        }
         for (EnemySquare enemySquare : enemySquares) {
             enemySquare.dispose();
         }

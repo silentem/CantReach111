@@ -1,4 +1,4 @@
-package com.whaletail.analytics;
+package com.whaletail.interfaces;
 
 public interface Analytic {
 
@@ -13,5 +13,7 @@ public interface Analytic {
     void pressedPlay();
 
     void pressedRetry(int tries);
+
+    void pressedOnWatchAd();
 
 }

@@ -16,6 +16,7 @@ import com.whaletail.actors.EnemySquare;
 import com.whaletail.gui.Button;
 import com.whaletail.gui.Text;
 import com.whaletail.gui.ViewActor;
+import com.whaletail.interfaces.OnAdCallback;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.forever;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.moveTo;
@@ -36,6 +37,8 @@ public class LossScreen extends BaseScreen {
     private OrthographicCamera cam;
     private Stage stage;
     private Stage stageHUD;
+
+    private Image extraLifeImage;
 
     public LossScreen(CantReachGame game) {
         this.game = game;
@@ -120,6 +123,34 @@ public class LossScreen extends BaseScreen {
             }
         };
 
+
+        String extraLineFileName = "baseline_favorite_white_48.png";
+        extraLifeImage = new Image(game.asset.get(extraLineFileName, Texture.class));
+
+        extraLifeImage.setPosition(stage.getCamera().viewportWidth / 6, 75);
+
+        extraLifeImage.setHeight(50);
+        extraLifeImage.setWidth(50);
+
+        extraLifeImage.addListener(new ActorGestureListener() {
+            @Override
+            public void tap(InputEvent event, float x, float y, int count, int button) {
+                game.adWatcher.showAd(new OnAdCallback() {
+                    @Override
+                    public void onAdWatched() {
+                        game.hasExtraLife = true;
+                        extraLifeImage.remove();
+                    }
+                });
+            }
+        });
+
+        extraLifeImage.addAction(
+                forever(
+                        sequence(
+                                scaleTo(.90f, .90f, .55f),
+                                scaleTo(.95f, .95f, .55f))));
+
         view = new EnemySquare.View(game.asset.get("enemy-2.png", Texture.class), 30, 2);
         ViewActor view2 = new ViewActor(
                 new Vector2(0, bestScoreText.getY() - 5 - bestScoreText.getHeight()),
@@ -133,6 +164,9 @@ public class LossScreen extends BaseScreen {
         stage.addActor(view1);
         stage.addActor(view2);
         stage.addActor(scoreText);
+        if (!game.hasExtraLife) {
+            stage.addActor(extraLifeImage);
+        }
         stage.addActor(bestScoreText);
         stage.addActor(canNotText);
         stage.addActor(reachText);
