@@ -109,7 +109,8 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
 
     private void loadRewardedVideoAd() {
         String productionAd = "ca-app-pub-8186248102983118/5801237239";
-        mRewardedVideoAd.loadAd("ca-app-pub-3940256099942544/5224354917",
+        String testAd = "ca-app-pub-3940256099942544/5224354917";
+        mRewardedVideoAd.loadAd(testAd,
                 new AdRequest.Builder().build());
     }
 

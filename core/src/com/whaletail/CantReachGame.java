@@ -33,7 +33,7 @@ public class CantReachGame extends Game {
 
     public int tries = 0;
 
-    public boolean hasExtraLife = true;
+    public boolean hasExtraLife = false;
 
     public MenuScreen menuScreen;
     public GameScreen gameScreen;
@@ -52,11 +52,13 @@ public class CantReachGame extends Game {
 
     @Override
     public void create() {
-        System.out.println("START");
         cam = new OrthographicCamera();
         cam.setToOrtho(false, V_WIDTH, V_HEIGHT);
         asset = new AssetManager();
         prefs = Gdx.app.getPreferences("WhaleTailPreferences");
+
+
+        hasExtraLife = prefs.getBoolean("extraLife", false);
 
         LoadingScreen loadingScreen = new LoadingScreen(this);
         menuScreen = new MenuScreen(this);

@@ -124,7 +124,6 @@ public class LossScreen extends BaseScreen {
         };
 
 
-
         String extraLineFileName = "baseline_favorite_white_48.png";
         extraLifeImage = new Image(game.asset.get(extraLineFileName, Texture.class));
 
@@ -148,6 +147,8 @@ public class LossScreen extends BaseScreen {
                         game.hasExtraLife = true;
                         extraLifeImage.remove();
                         plusOne.remove();
+                        game.prefs.putBoolean("extraLife", true);
+                        game.prefs.flush();
                     }
                 });
             }

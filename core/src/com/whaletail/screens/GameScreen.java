@@ -243,19 +243,7 @@ public class GameScreen extends BaseScreen {
             }
             if (player.collides(enemySquare)) {
                 if (game.hasExtraLife) {
-                    game.hasExtraLife = false;
-                    extraLifeImage.remove();
-                    player.setInvulnerable(true);
-                    float delay = 1f;
-
-                    Timer.schedule(new Timer.Task() {
-
-                        @Override
-                        public void run() {
-                            player.setInvulnerable(false);
-                        }
-
-                    }, delay);
+                   loseLife();
                 } else  {
                     lose();
                 }
@@ -266,6 +254,25 @@ public class GameScreen extends BaseScreen {
             }
         }
 
+    }
+
+    private void loseLife(){
+        game.hasExtraLife = false;
+        extraLifeImage.remove();
+
+        game.prefs.putBoolean("extraLife", false);
+        game.prefs.flush();
+        player.setInvulnerable(true);
+        float delay = 1f;
+
+        Timer.schedule(new Timer.Task() {
+
+            @Override
+            public void run() {
+                player.setInvulnerable(false);
+            }
+
+        }, delay);
     }
 
     private void win() {

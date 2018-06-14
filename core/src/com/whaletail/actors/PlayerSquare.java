@@ -184,7 +184,13 @@ public class PlayerSquare extends Actor {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         if (!isDead() && !overlaps) {
-            view.getImage().draw(batch, parentAlpha);
+            if (!isInvulnerable() || state == State.TELEPORTING) {
+                view.getImage().draw(batch, parentAlpha);
+            } else {
+                if ((System.currentTimeMillis() % 100) <= 50) {
+                    view.getImage().draw(batch, parentAlpha);
+                }
+            }
         } else {
             for (Shard shard : shards) {
                 shard.render(batch);
