@@ -11,6 +11,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.whaletail.gui.Score;
 import com.whaletail.interfaces.AdWatcher;
 import com.whaletail.interfaces.Analytic;
+import com.whaletail.interfaces.GameService;
 import com.whaletail.screens.GameScreen;
 import com.whaletail.screens.LoadingScreen;
 import com.whaletail.screens.LossScreen;
@@ -41,10 +42,12 @@ public class CantReachGame extends Game {
 
     public Analytic analytic;
     public AdWatcher adWatcher;
+    public GameService gameService;
 
-    public CantReachGame(Analytic analytic, AdWatcher adWatcher) {
+    public CantReachGame(Analytic analytic, AdWatcher adWatcher, GameService gameService) {
         this.analytic = analytic;
         this.adWatcher = adWatcher;
+        this.gameService = gameService;
     }
 
     public CantReachGame() {

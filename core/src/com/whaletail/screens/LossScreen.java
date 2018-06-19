@@ -142,6 +142,7 @@ public class LossScreen extends BaseScreen {
             @Override
             public void tap(InputEvent event, float x, float y, int count, int button) {
                 System.out.println("Tapped on ad");
+                game.analytic.pressedOnWatchAd();
                 game.adWatcher.showAd(new OnAdCallback() {
                     @Override
                     public void onAdWatched() {

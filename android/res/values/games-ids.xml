@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Google Play game services IDs.
+Save this file as res/values/games-ids.xml in your project.
+-->
+<resources>
+    <!-- app_id -->
+    <string name="app_id" translatable="false">680529683216</string>
+    <!-- package_name -->
+    <string name="package_name" translatable="false">com.whaletail</string>
+    <!-- achievement 20 points -->
+    <string name="achievement_20_points" translatable="false">CgkIkMbrlecTEAIQBA</string>
+    <!-- achievement 40 points -->
+    <string name="achievement_40_points" translatable="false">CgkIkMbrlecTEAIQBQ</string>
+    <!-- achievement 60 points -->
+    <string name="achievement_60_points" translatable="false">CgkIkMbrlecTEAIQBg</string>
+    <!-- achievement 80 points -->
+    <string name="achievement_80_points" translatable="false">CgkIkMbrlecTEAIQBw</string>
+    <!-- achievement 100 points -->
+    <string name="achievement_100_points" translatable="false">CgkIkMbrlecTEAIQCA</string>
+    <!-- achievement You got it! -->
+    <string name="achievement_you_got_it" translatable="false">CgkIkMbrlecTEAIQCQ</string>
+    <!-- leaderboard Can't Reach 111 Rating -->
+    <string name="leaderboard_cant_reach_111_rating" translatable="false">CgkIkMbrlecTEAIQAg</string>
+</resources>

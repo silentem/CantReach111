@@ -75,7 +75,6 @@ public class GameScreen extends BaseScreen {
         isTutorialPassed = game.prefs.getBoolean("tutorial_passed", false);
         if (!isTutorialPassed) {
             setupTutorial();
-            game.hasExtraLife = true;
         } else {
             Gdx.input.setInputProcessor(stage);
         }
@@ -244,8 +243,8 @@ public class GameScreen extends BaseScreen {
             }
             if (player.collides(enemySquare)) {
                 if (game.hasExtraLife) {
-                   loseLife();
-                } else  {
+                    loseLife();
+                } else {
                     lose();
                 }
 
@@ -257,7 +256,7 @@ public class GameScreen extends BaseScreen {
 
     }
 
-    private void loseLife(){
+    private void loseLife() {
         game.hasExtraLife = false;
         extraLifeImage.remove();
 
@@ -357,6 +356,32 @@ public class GameScreen extends BaseScreen {
 
     public void addScore(int amount) {
         game.score.add(amount);
+        switch (amount) {
+            case 20: {
+                game.gameService.reach20Points();
+                break;
+            }
+            case 40: {
+                game.gameService.reach20Points();
+                break;
+            }
+            case 60: {
+                game.gameService.reach20Points();
+                break;
+            }
+            case 80: {
+                game.gameService.reach20Points();
+                break;
+            }
+            case 100: {
+                game.gameService.reach20Points();
+                break;
+            }
+            case 111: {
+                game.gameService.reach20Points();
+                break;
+            }
+        }
         font.setText(game.score.toString());
     }
 
