@@ -356,7 +356,7 @@ public class GameScreen extends BaseScreen {
 
     public void addScore(int amount) {
         game.score.add(amount);
-        switch (amount) {
+        switch (game.score.getScore()) {
             case 20: {
                 game.gameService.reach20Points();
                 break;

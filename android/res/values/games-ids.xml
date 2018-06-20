@@ -22,4 +22,6 @@ Save this file as res/values/games-ids.xml in your project.
     <string name="achievement_you_got_it" translatable="false">CgkIkMbrlecTEAIQCQ</string>
     <!-- leaderboard Can't Reach 111 Rating -->
     <string name="leaderboard_cant_reach_111_rating" translatable="false">CgkIkMbrlecTEAIQAg</string>
+    <!-- leaderboard CantReach111Rating -->
+    <string name="leaderboard_cantreach111rating" translatable="false">CgkIkMbrlecTEAIQCg</string>
 </resources>

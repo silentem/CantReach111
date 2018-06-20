@@ -1,10 +1,7 @@
 package com.whaletail;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
@@ -14,20 +11,16 @@ import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.games.Games;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.whaletail.interfaces.AdWatcher;
 import com.whaletail.interfaces.Analytic;
 import com.whaletail.interfaces.GameService;
 import com.whaletail.interfaces.OnAdCallback;
 
-public class AndroidLauncher extends AndroidApplication implements RewardedVideoAdListener {
+import google.games.basegameutils.GameHelper;
+
+public class AndroidLauncher extends AndroidApplication implements RewardedVideoAdListener, GameHelper.GameHelperListener, GameService {
 
     private static final String TAG = "TAG";
 
@@ -38,101 +31,58 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
     private RewardedVideoAd mRewardedVideoAd;
 
 
-    // Client used to sign in with Google APIs
-    private GoogleSignInClient mGoogleSignInClient = null;
+    private static String SAVED_LEADERBOARD_REQUESTED = "SAVED_LEADERBOARD_REQUESTED";
+    private static String SAVED_ACHIEVEMENTS_REQUESTED = "SAVED_ACHIEVEMENTS_REQUESTED";
+
+    private boolean mLeaderboardRequested;
+    private boolean mAchievementsRequested;
+
+    private GameHelper gameHelper;
+
 
     private OnAdCallback onAdCallback;
 
 
-    // The currently signed in account, used to check the account has changed outside of this activity when resuming.
-    GoogleSignInAccount mSignedInAccount = null;
-
-    public void startSignInIntent() {
-        startActivityForResult(mGoogleSignInClient.getSignInIntent(), RC_SIGN_IN);
-    }
-
-    /**
-     * Try to sign in without displaying dialogs to the user.
-     * <p>
-     * If the user has already signed in previously, it will not show dialog.
-     */
-    public void signInSilently() {
-        Log.d(TAG, "signInSilently()");
-
-        mGoogleSignInClient.silentSignIn().addOnCompleteListener(this,
-                new OnCompleteListener<GoogleSignInAccount>() {
-                    @Override
-                    public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "signInSilently(): success");
-                            onConnected(task.getResult());
-                        } else {
-                            Log.d(TAG, "signInSilently(): failure", task.getException());
-                        }
-                    }
-                });
-    }
-
-    public void signOut() {
-        Log.d(TAG, "signOut()");
-
-        mGoogleSignInClient.signOut().addOnCompleteListener(this,
-                new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "signOut(): success");
-                        } else {
-                        }
-
-                    }
-                });
-    }
-
-
-    private void onConnected(GoogleSignInAccount googleSignInAccount) {
-        Log.d(TAG, "onConnected(): connected to Google APIs");
-        if (mSignedInAccount != googleSignInAccount) {
-
-            mSignedInAccount = googleSignInAccount;
-
-        }
-
-
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(SAVED_LEADERBOARD_REQUESTED, mLeaderboardRequested);
+        outState.putBoolean(SAVED_ACHIEVEMENTS_REQUESTED, mAchievementsRequested);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mLeaderboardRequested = savedInstanceState.getBoolean(SAVED_LEADERBOARD_REQUESTED, false);
+        mAchievementsRequested = savedInstanceState.getBoolean(SAVED_ACHIEVEMENTS_REQUESTED, false);
+    }
 
-        if (requestCode == RC_SIGN_IN) {
+    @Override
+    public void onSignInFailed() {
+        // handle sign-in failure (e.g. show Sign In button)
+        mLeaderboardRequested = false;
+        mAchievementsRequested = false;
+    }
 
-            Task<GoogleSignInAccount> task =
-                    GoogleSignIn.getSignedInAccountFromIntent(data);
+    @Override
+    public void onSignInSucceeded() {
 
-            try {
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                onConnected(account);
-            } catch (ApiException apiException) {
-                String message = apiException.getMessage();
-                if (message == null || message.isEmpty()) {
-                }
+        if (mLeaderboardRequested) {
+            displayLeaderboard();
+            mLeaderboardRequested = false;
+        }
 
-
-                new AlertDialog.Builder(this)
-                        .setMessage(message)
-                        .setNeutralButton(android.R.string.ok, null)
-                        .show();
-            }
+        if (mAchievementsRequested) {
+            displayAchievements();
+            mAchievementsRequested = false;
         }
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mGoogleSignInClient = GoogleSignIn.getClient(this, GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
-        startSignInIntent();
         MobileAds.initialize(this, "ca-app-pub-8186248102983118~8660017752");
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
@@ -143,7 +93,13 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
         mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
         mRewardedVideoAd.setRewardedVideoAdListener(this);
 
+
         loadRewardedVideoAd();
+
+        gameHelper = new GameHelper(this, GameHelper.CLIENT_GAMES);
+        gameHelper.setup(this);
+        gameHelper.setMaxAutoSignInAttempts(0);
+        gameHelper.beginUserInitiatedSignIn();
 
 
         initialize(
@@ -214,56 +170,14 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
                                 });
                             }
                         },
-                        new GameService() {
-                            @Override
-                            public void reach20Points() {
-                                logAchievement(20);
-                                Games.getAchievementsClient(AndroidLauncher.this, GoogleSignIn.getLastSignedInAccount(AndroidLauncher.this))
-                                        .unlock(getString(R.string.achievement_20_points));
-                            }
-
-                            @Override
-                            public void reach40Points() {
-                                logAchievement(40);
-                                Games.getAchievementsClient(AndroidLauncher.this, GoogleSignIn.getLastSignedInAccount(AndroidLauncher.this))
-                                        .unlock(getString(R.string.achievement_40_points));
-                            }
-
-                            @Override
-                            public void reach60Points() {
-                                logAchievement(60);
-                                Games.getAchievementsClient(AndroidLauncher.this, GoogleSignIn.getLastSignedInAccount(AndroidLauncher.this))
-                                        .unlock(getString(R.string.achievement_60_points));
-                            }
-
-                            @Override
-                            public void reach80Points() {
-                                logAchievement(80);
-                                Games.getAchievementsClient(AndroidLauncher.this, GoogleSignIn.getLastSignedInAccount(AndroidLauncher.this))
-                                        .unlock(getString(R.string.achievement_80_points));
-                            }
-
-                            @Override
-                            public void reach100Points() {
-                                logAchievement(100);
-                                Games.getAchievementsClient(AndroidLauncher.this, GoogleSignIn.getLastSignedInAccount(AndroidLauncher.this))
-                                        .unlock(getString(R.string.achievement_100_points));
-                            }
-
-                            @Override
-                            public void reach111Points() {
-                                logAchievement(111);
-                                Games.getAchievementsClient(AndroidLauncher.this, GoogleSignIn.getLastSignedInAccount(AndroidLauncher.this))
-                                        .unlock(getString(R.string.achievement_you_got_it));
-                            }
-                        }), config);
+                        this), config);
 
     }
 
     private void logAchievement(int points) {
         Bundle params = new Bundle();
         params.putString("achievement" + points, String.valueOf(points));
-        mFirebaseAnalytics.logEvent("achievement" + points, params);
+        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.UNLOCK_ACHIEVEMENT, params);
     }
 
     private void loadRewardedVideoAd() {
@@ -273,6 +187,75 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
                 new AdRequest.Builder()
 //                        .addTestDevice("AE901101C564DAFE18B7BA29B1A6CA1A")
                         .build());
+    }
+
+
+    @Override
+    public void displayLeaderboard() {
+        if (gameHelper.isSignedIn()) {
+            startActivityForResult(Games.Leaderboards.getLeaderboardIntent(gameHelper.getApiClient(),
+                    getString(R.string.leaderboard_cantreach111rating)), 24);
+        } else {
+            gameHelper.beginUserInitiatedSignIn();
+            mLeaderboardRequested = true;
+        }
+    }
+
+    @Override
+    public void displayAchievements() {
+        if (gameHelper.isSignedIn()) {
+            startActivityForResult(
+                    Games.Achievements.getAchievementsIntent(gameHelper.getApiClient()), 25);
+        } else {
+            gameHelper.beginUserInitiatedSignIn();
+            mAchievementsRequested = true;
+        }
+    }
+
+    @Override
+    public void reach20Points() {
+        if (gameHelper.isSignedIn()) {
+            startActivityForResult(
+                    Games.Achievements.getAchievementsIntent(gameHelper.getApiClient()), 25);
+            Games.getAchievementsClient(AndroidLauncher.this, GoogleSignIn.getLastSignedInAccount(AndroidLauncher.this))
+                    .unlock(getString(R.string.achievement_20_points));
+            logAchievement(20);
+        }
+    }
+
+    @Override
+    public void reach40Points() {
+        logAchievement(40);
+        Games.getAchievementsClient(AndroidLauncher.this, GoogleSignIn.getLastSignedInAccount(AndroidLauncher.this))
+                .unlock(getString(R.string.achievement_40_points));
+    }
+
+    @Override
+    public void reach60Points() {
+        logAchievement(60);
+        Games.getAchievementsClient(AndroidLauncher.this, GoogleSignIn.getLastSignedInAccount(AndroidLauncher.this))
+                .unlock(getString(R.string.achievement_60_points));
+    }
+
+    @Override
+    public void reach80Points() {
+        logAchievement(80);
+        Games.getAchievementsClient(AndroidLauncher.this, GoogleSignIn.getLastSignedInAccount(AndroidLauncher.this))
+                .unlock(getString(R.string.achievement_80_points));
+    }
+
+    @Override
+    public void reach100Points() {
+        logAchievement(100);
+        Games.getAchievementsClient(AndroidLauncher.this, GoogleSignIn.getLastSignedInAccount(AndroidLauncher.this))
+                .unlock(getString(R.string.achievement_100_points));
+    }
+
+    @Override
+    public void reach111Points() {
+        logAchievement(111);
+        Games.getAchievementsClient(AndroidLauncher.this, GoogleSignIn.getLastSignedInAccount(AndroidLauncher.this))
+                .unlock(getString(R.string.achievement_you_got_it));
     }
 
     @Override
@@ -321,6 +304,24 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        gameHelper.onStart(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        gameHelper.onStop();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        gameHelper.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
     public void onResume() {
         mRewardedVideoAd.resume(this);
         super.onResume();
@@ -337,5 +338,4 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
         mRewardedVideoAd.destroy(this);
         super.onDestroy();
     }
-
 }
