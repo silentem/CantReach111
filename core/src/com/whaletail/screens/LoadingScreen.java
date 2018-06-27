@@ -64,8 +64,8 @@ public class LoadingScreen extends BaseScreen {
     }
 
     private void update() {
-        if (game.asset.update() && TimeUtils.timeSinceMillis(startTime) > 1000) {
-            game.setScreen(game.menuScreen);
+        if (game.asset.update()) {
+            game.setScreen(game.gameScreen);
         }
     }
 

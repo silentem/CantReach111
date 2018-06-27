@@ -2,6 +2,7 @@ package com.whaletail;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.StringRes;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
@@ -10,17 +11,23 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
+import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.games.Games;
+import com.google.android.gms.games.GamesClient;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.whaletail.interfaces.AdWatcher;
 import com.whaletail.interfaces.Analytic;
 import com.whaletail.interfaces.GameService;
 import com.whaletail.interfaces.OnAdCallback;
 
-import google.games.basegameutils.GameHelper;
 
-public class AndroidLauncher extends AndroidApplication implements RewardedVideoAdListener, GameHelper.GameHelperListener, GameService {
+public class AndroidLauncher extends AndroidApplication implements RewardedVideoAdListener, GameService {
 
     private static final String TAG = "TAG";
 
@@ -37,8 +44,7 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
     private boolean mLeaderboardRequested;
     private boolean mAchievementsRequested;
 
-    private GameHelper gameHelper;
-
+    private GoogleSignInAccount signedInAccount;
 
     private OnAdCallback onAdCallback;
 
@@ -57,120 +63,98 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
         mAchievementsRequested = savedInstanceState.getBoolean(SAVED_ACHIEVEMENTS_REQUESTED, false);
     }
 
-    @Override
-    public void onSignInFailed() {
-        // handle sign-in failure (e.g. show Sign In button)
-        mLeaderboardRequested = false;
-        mAchievementsRequested = false;
-    }
-
-    @Override
-    public void onSignInSucceeded() {
-
-        if (mLeaderboardRequested) {
-            displayLeaderboard();
-            mLeaderboardRequested = false;
-        }
-
-        if (mAchievementsRequested) {
-            displayAchievements();
-            mAchievementsRequested = false;
-        }
-    }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         MobileAds.initialize(this, "ca-app-pub-8186248102983118~8660017752");
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
+        GoogleSignInClient signInClient = GoogleSignIn.getClient(this,
+                GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
+        Intent intent = signInClient.getSignInIntent();
+        startActivityForResult(intent, RC_SIGN_IN);
 
         AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
         config.useAccelerometer = false;
         config.useCompass = false;
+
 
         mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
         mRewardedVideoAd.setRewardedVideoAdListener(this);
 
 
         loadRewardedVideoAd();
+        CantReachGame game = new CantReachGame(new Analytic() {
+            @Override
+            public void submitScore(int score) {
+                Bundle params = new Bundle();
+                params.putString("score", String.valueOf(score));
+                mFirebaseAnalytics.logEvent("reached_score", params);
+            }
 
-        gameHelper = new GameHelper(this, GameHelper.CLIENT_GAMES);
-        gameHelper.setup(this);
-        gameHelper.setMaxAutoSignInAttempts(0);
-        gameHelper.beginUserInitiatedSignIn();
+            @Override
+            public void turnedOnMusic() {
+                Bundle params = new Bundle();
+                params.putBoolean("music", true);
+                mFirebaseAnalytics.logEvent("turn_on_music", params);
+            }
 
+            @Override
+            public void turnedOffMusic() {
+                Bundle params = new Bundle();
+                params.putBoolean("music", false);
+                mFirebaseAnalytics.logEvent("turn_off_music", params);
+            }
 
-        initialize(
-                new CantReachGame(new Analytic() {
+            @Override
+            public void goneHome() {
+                Bundle params = new Bundle();
+                params.putString("nav", "home");
+                mFirebaseAnalytics.logEvent("navigation", params);
+
+            }
+
+            @Override
+            public void pressedPlay() {
+                Bundle params = new Bundle();
+                params.putString("nav", "play");
+                mFirebaseAnalytics.logEvent("navigation", params);
+
+            }
+
+            @Override
+            public void pressedRetry(int tries) {
+                Bundle params = new Bundle();
+                params.putString("nav", "retry");
+                params.putInt("tries", tries);
+                mFirebaseAnalytics.logEvent("navigation", params);
+            }
+
+            @Override
+            public void pressedOnWatchAd() {
+                Bundle params = new Bundle();
+                params.putBoolean("ad", true);
+                mFirebaseAnalytics.logEvent("pressed_on_ad", params);
+            }
+        },
+                new AdWatcher() {
                     @Override
-                    public void submitScore(int score) {
-                        Bundle params = new Bundle();
-                        params.putString("score", String.valueOf(score));
-                        mFirebaseAnalytics.logEvent("reached_score", params);
-                    }
-
-                    @Override
-                    public void turnedOnMusic() {
-                        Bundle params = new Bundle();
-                        params.putBoolean("music", true);
-                        mFirebaseAnalytics.logEvent("turn_on_music", params);
-                    }
-
-                    @Override
-                    public void turnedOffMusic() {
-                        Bundle params = new Bundle();
-                        params.putBoolean("music", false);
-                        mFirebaseAnalytics.logEvent("turn_off_music", params);
-                    }
-
-                    @Override
-                    public void goneHome() {
-                        Bundle params = new Bundle();
-                        params.putString("nav", "home");
-                        mFirebaseAnalytics.logEvent("navigation", params);
-
-                    }
-
-                    @Override
-                    public void pressedPlay() {
-                        Bundle params = new Bundle();
-                        params.putString("nav", "play");
-                        mFirebaseAnalytics.logEvent("navigation", params);
-
-                    }
-
-                    @Override
-                    public void pressedRetry(int tries) {
-                        Bundle params = new Bundle();
-                        params.putString("nav", "retry");
-                        params.putInt("tries", tries);
-                        mFirebaseAnalytics.logEvent("navigation", params);
-                    }
-
-                    @Override
-                    public void pressedOnWatchAd() {
-                        Bundle params = new Bundle();
-                        params.putBoolean("ad", true);
-                        mFirebaseAnalytics.logEvent("pressed_on_ad", params);
+                    public void showAd(OnAdCallback callback) {
+                        onAdCallback = callback;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mRewardedVideoAd.isLoaded()) {
+                                    mRewardedVideoAd.show();
+                                }
+                            }
+                        });
                     }
                 },
-                        new AdWatcher() {
-                            @Override
-                            public void showAd(OnAdCallback callback) {
-                                onAdCallback = callback;
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (mRewardedVideoAd.isLoaded()) {
-                                            mRewardedVideoAd.show();
-                                        }
-                                    }
-                                });
-                            }
-                        },
-                        this), config);
+                this);
+        initialize(game, config);
+
 
     }
 
@@ -192,70 +176,90 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
 
     @Override
     public void displayLeaderboard() {
-        if (gameHelper.isSignedIn()) {
-            startActivityForResult(Games.Leaderboards.getLeaderboardIntent(gameHelper.getApiClient(),
-                    getString(R.string.leaderboard_cantreach111rating)), 24);
-        } else {
-            gameHelper.beginUserInitiatedSignIn();
-            mLeaderboardRequested = true;
-        }
+//        startActivityForResult(Games.Leaderboards.getLeaderboardIntent(gameHelper.getApiClient(),
+//                getString(R.string.leaderboard_cantreach111rating)), 24);
     }
 
     @Override
     public void displayAchievements() {
-        if (gameHelper.isSignedIn()) {
-            startActivityForResult(
-                    Games.Achievements.getAchievementsIntent(gameHelper.getApiClient()), 25);
+        GoogleSignInAccount lastSignedInAccount;
+        if (signedInAccount == null) {
+            lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(this);
         } else {
-            gameHelper.beginUserInitiatedSignIn();
-            mAchievementsRequested = true;
+            lastSignedInAccount = signedInAccount;
         }
+        Games.getAchievementsClient(this, lastSignedInAccount)
+                .getAchievementsIntent()
+                .addOnSuccessListener(new OnSuccessListener<Intent>() {
+                    @Override
+                    public void onSuccess(Intent intent) {
+                        startActivity(intent);
+                    }
+                });
+    }
+
+    private void showAchievements(GoogleSignInAccount lastSignedInAccount) {
+        if (lastSignedInAccount != null) {
+            Games.getAchievementsClient(this, lastSignedInAccount)
+                    .getAchievementsIntent()
+                    .addOnSuccessListener(new OnSuccessListener<Intent>() {
+                        @Override
+                        public void onSuccess(Intent intent) {
+                            startActivityForResult(intent, 25);
+                        }
+                    });
+        }
+    }
+
+    private GoogleSignInAccount achieve(int score, @StringRes final int id) {
+        final GoogleSignInAccount lastSignedInAccount;
+        if (signedInAccount == null) {
+            lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(this);
+        } else {
+            lastSignedInAccount = signedInAccount;
+        }
+        if (lastSignedInAccount != null) {
+            logAchievement(score);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Games.getAchievementsClient(AndroidLauncher.this, lastSignedInAccount)
+                            .unlock(getString(id));
+
+                }
+            });
+        }
+        return lastSignedInAccount;
     }
 
     @Override
     public void reach20Points() {
-        if (gameHelper.isSignedIn()) {
-            startActivityForResult(
-                    Games.Achievements.getAchievementsIntent(gameHelper.getApiClient()), 25);
-            Games.getAchievementsClient(AndroidLauncher.this, GoogleSignIn.getLastSignedInAccount(AndroidLauncher.this))
-                    .unlock(getString(R.string.achievement_20_points));
-            logAchievement(20);
-        }
+        achieve(20, R.string.achievement_20_points);
     }
 
     @Override
     public void reach40Points() {
-        logAchievement(40);
-        Games.getAchievementsClient(AndroidLauncher.this, GoogleSignIn.getLastSignedInAccount(AndroidLauncher.this))
-                .unlock(getString(R.string.achievement_40_points));
+        achieve(40, R.string.achievement_40_points);
     }
 
     @Override
     public void reach60Points() {
-        logAchievement(60);
-        Games.getAchievementsClient(AndroidLauncher.this, GoogleSignIn.getLastSignedInAccount(AndroidLauncher.this))
-                .unlock(getString(R.string.achievement_60_points));
+        showAchievements(achieve(60, R.string.achievement_60_points));
     }
 
     @Override
     public void reach80Points() {
-        logAchievement(80);
-        Games.getAchievementsClient(AndroidLauncher.this, GoogleSignIn.getLastSignedInAccount(AndroidLauncher.this))
-                .unlock(getString(R.string.achievement_80_points));
+        showAchievements(achieve(80, R.string.achievement_80_points));
     }
 
     @Override
     public void reach100Points() {
-        logAchievement(100);
-        Games.getAchievementsClient(AndroidLauncher.this, GoogleSignIn.getLastSignedInAccount(AndroidLauncher.this))
-                .unlock(getString(R.string.achievement_100_points));
+        showAchievements(achieve(100, R.string.achievement_100_points));
     }
 
     @Override
     public void reach111Points() {
-        logAchievement(111);
-        Games.getAchievementsClient(AndroidLauncher.this, GoogleSignIn.getLastSignedInAccount(AndroidLauncher.this))
-                .unlock(getString(R.string.achievement_you_got_it));
+        showAchievements(achieve(111, R.string.achievement_you_got_it));
     }
 
     @Override
@@ -303,22 +307,20 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
 
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        gameHelper.onStart(this);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        gameHelper.onStop();
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        gameHelper.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            if (result.isSuccess()) {
+                // The signed in account is stored in the result.
+                signedInAccount = result.getSignInAccount();
+
+                GamesClient gamesClient = Games.getGamesClient(this, signedInAccount);
+                gamesClient.setViewForPopups(getWindow().getDecorView().findViewById(android.R.id.content));
+            }
+        }
     }
 
     @Override

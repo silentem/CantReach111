@@ -317,8 +317,10 @@ public class GameScreen extends BaseScreen {
         if (player != null) {
             player.dispose();
         }
-        for (EnemySquare enemySquare : enemySquares) {
-            enemySquare.dispose();
+        if (enemySquares != null) {
+            for (EnemySquare enemySquare : enemySquares) {
+                enemySquare.dispose();
+            }
         }
         game.world.dispose();
     }
@@ -356,32 +358,6 @@ public class GameScreen extends BaseScreen {
 
     public void addScore(int amount) {
         game.score.add(amount);
-        switch (game.score.getScore()) {
-            case 20: {
-                game.gameService.reach20Points();
-                break;
-            }
-            case 40: {
-                game.gameService.reach20Points();
-                break;
-            }
-            case 60: {
-                game.gameService.reach20Points();
-                break;
-            }
-            case 80: {
-                game.gameService.reach20Points();
-                break;
-            }
-            case 100: {
-                game.gameService.reach20Points();
-                break;
-            }
-            case 111: {
-                game.gameService.reach20Points();
-                break;
-            }
-        }
         font.setText(game.score.toString());
     }
 
