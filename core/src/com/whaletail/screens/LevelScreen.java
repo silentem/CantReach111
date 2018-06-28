@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.whaletail.CantReachGame;
@@ -71,7 +70,7 @@ public class LevelScreen extends BaseScreen {
         }
     }
 
-    private void update(){
+    private void update() {
         if (shim != null && shim.getX() + shim.getWidth() >= stage.getWidth()) {
             shim.addAction(sequence(delay(.05f), run(
                     new Runnable() {
@@ -104,6 +103,7 @@ public class LevelScreen extends BaseScreen {
         hardFont.addListener(new LevelDifficultyActorGestureListener(this, 2));
 
     }
+
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, false);
@@ -122,9 +122,26 @@ public class LevelScreen extends BaseScreen {
 
     public void startGame(int difficulty) {
         game.difficulty = difficulty;
+
+        switch (difficulty) {
+            case 0: {
+                game.analytic.easy();
+                break;
+            }
+            case 1: {
+                game.analytic.medium();
+                break;
+            }
+            case 2: {
+                game.analytic.hard();
+                break;
+            }
+        }
+
         ViewActor viewActor = viewActors[difficulty];
         viewActor.setDirection(new Vector2(stage.getWidth(), viewActor.getY()));
-        viewActor.move((MathUtils.random(3) + 3) / 10f);EnemySquare.View view = new EnemySquare.View(foreground, 1, 1);
+        viewActor.move((MathUtils.random(3) + 3) / 10f);
+        EnemySquare.View view = new EnemySquare.View(foreground, 1, 1);
         shim = new ViewActor(new Vector2(0 - view.getWidth(), 0),
                 new Vector2(0, 0),
                 view) {

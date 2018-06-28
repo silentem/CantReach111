@@ -16,4 +16,10 @@ public interface Analytic {
 
     void pressedOnWatchAd();
 
+    void hard();
+
+    void medium();
+
+    void easy();
+
 }

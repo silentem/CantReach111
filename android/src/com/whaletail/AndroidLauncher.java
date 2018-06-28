@@ -69,11 +69,15 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
         super.onCreate(savedInstanceState);
         MobileAds.initialize(this, "ca-app-pub-8186248102983118~8660017752");
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-
-        GoogleSignInClient signInClient = GoogleSignIn.getClient(this,
-                GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
-        Intent intent = signInClient.getSignInIntent();
-//        startActivityForResult(intent, RC_SIGN_IN);
+        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
+        if (acct == null) {
+            GoogleSignInClient signInClient = GoogleSignIn.getClient(this,
+                    GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
+            Intent intent = signInClient.getSignInIntent();
+            startActivityForResult(intent, RC_SIGN_IN);
+        } else {
+            signedInAccount = acct;
+        }
 
         AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
         config.useAccelerometer = false;
@@ -136,6 +140,26 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
                 Bundle params = new Bundle();
                 params.putBoolean("ad", true);
                 mFirebaseAnalytics.logEvent("pressed_on_ad", params);
+            }
+
+            @Override
+            public void hard() {
+                Bundle params = new Bundle();
+                mFirebaseAnalytics.logEvent("hard", params);
+            }
+
+            @Override
+            public void medium() {
+
+                Bundle params = new Bundle();
+                mFirebaseAnalytics.logEvent("medium", params);
+            }
+
+            @Override
+            public void easy() {
+
+                Bundle params = new Bundle();
+                mFirebaseAnalytics.logEvent("easy", params);
             }
         },
                 new AdWatcher() {
