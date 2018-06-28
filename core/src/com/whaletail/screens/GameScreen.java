@@ -160,24 +160,24 @@ public class GameScreen extends BaseScreen {
         int speed = 0;
         if (0 <= game.score.getScore() && game.score.getScore() <= 30) {
             if (prev < 5) {
-                return MathUtils.random(2) + 3;
+                speed = MathUtils.random(1) + 2;
             } else {
-                return MathUtils.random(1) + 1;
+                speed = MathUtils.random(1) + 1;
             }
         } else if (30 < game.score.getScore() && game.score.getScore() <= 60) {
             if (prev < 7) {
-                return MathUtils.random(1) + 4;
+                speed = MathUtils.random(1) + 3;
             } else {
-                return MathUtils.random(2) + 3;
+                speed = MathUtils.random(1) + 2;
             }
         } else if (60 < game.score.getScore()) {
             if (prev < 8) {
-                return MathUtils.random(2) + 6;
+                speed = MathUtils.random(1) + 5;
             } else {
-                return MathUtils.random(3) + 4;
+                speed = MathUtils.random(2) + 3;
             }
         }
-        return speed;
+        return speed + game.difficulty;
     }
 
     private void lose() {

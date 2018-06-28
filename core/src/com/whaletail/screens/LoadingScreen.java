@@ -65,7 +65,7 @@ public class LoadingScreen extends BaseScreen {
 
     private void update() {
         if (game.asset.update()) {
-            game.setScreen(game.gameScreen);
+            game.setScreen(game.menuScreen);
         }
     }
 

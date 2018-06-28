@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 
 /**
@@ -12,7 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Widget;
  * @email silentem1113@gmail.com
  */
 
-public class Text extends Widget {
+public class Text extends Actor {
 
     private String text;
     private BitmapFont font;
@@ -27,6 +28,7 @@ public class Text extends Widget {
         this.font = font;
         System.out.println(System.currentTimeMillis() - start);
         glyphLayout = new GlyphLayout(font, text);
+        setTouchable(Touchable.enabled);
     }
 
     public Text(String text, BitmapFont font, Stage stage) {
@@ -34,6 +36,7 @@ public class Text extends Widget {
         this.stage = stage;
         this.font = font;
         glyphLayout = new GlyphLayout(font, text);
+        setTouchable(Touchable.enabled);
     }
 
     @Override
@@ -49,13 +52,23 @@ public class Text extends Widget {
     }
 
     @Override
+    public void setPosition(float x, float y) {
+        super.setPosition(x, y);
+        this.x = x;
+        this.y = y;
+        setBounds(x, y- getHeight(), getWidth(), getHeight());
+    }
+
+    @Override
     public void setX(float x) {
         this.x = x;
+        setBounds(x, y, getWidth(), getHeight());
     }
 
     @Override
     public void setY(float y) {
         this.y = y;
+        setBounds(x, y, getWidth(), getHeight());
     }
 
     public void setText(String text) {

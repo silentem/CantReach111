@@ -14,5 +14,8 @@ public class Constants {
     public static final String CAN_NOT = "Can't";
     public static final String REACH = "Reach";
     public static final String NUMBER = "111";
+    public static final String EASY = "Easy";
+    public static final String MEDIUM = "Medium";
+    public static final String HARD = "Hard";
     public static final String ANNOUNCEMENT = "BIG UPDATE ON THE WAY";
 }

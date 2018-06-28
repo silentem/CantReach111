@@ -13,6 +13,7 @@ import com.whaletail.interfaces.AdWatcher;
 import com.whaletail.interfaces.Analytic;
 import com.whaletail.interfaces.GameService;
 import com.whaletail.screens.GameScreen;
+import com.whaletail.screens.LevelScreen;
 import com.whaletail.screens.LoadingScreen;
 import com.whaletail.screens.LossScreen;
 import com.whaletail.screens.MenuScreen;
@@ -34,11 +35,14 @@ public class CantReachGame extends Game {
 
     public int tries = 0;
 
+    public int difficulty = 0;
+
     public boolean hasExtraLife = false;
 
     public MenuScreen menuScreen;
     public GameScreen gameScreen;
     public LossScreen lossScreen;
+    public LevelScreen levelScreen;
 
     public Analytic analytic;
     public AdWatcher adWatcher;
@@ -67,6 +71,7 @@ public class CantReachGame extends Game {
         menuScreen = new MenuScreen(this);
         gameScreen = new GameScreen(this);
         lossScreen = new LossScreen(this);
+        levelScreen = new LevelScreen(this);
 
         initFonts();
 

@@ -73,7 +73,7 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
         GoogleSignInClient signInClient = GoogleSignIn.getClient(this,
                 GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
         Intent intent = signInClient.getSignInIntent();
-        startActivityForResult(intent, RC_SIGN_IN);
+//        startActivityForResult(intent, RC_SIGN_IN);
 
         AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
         config.useAccelerometer = false;
