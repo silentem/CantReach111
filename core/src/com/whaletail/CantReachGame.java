@@ -87,7 +87,9 @@ public class CantReachGame extends Game {
     public void dispose() {
         asset.dispose();
         menuScreen.dispose();
-        gameScreen.dispose();
+        if (gameScreen != null) {
+            gameScreen.dispose();
+        }
         lossScreen.dispose();
     }
 
