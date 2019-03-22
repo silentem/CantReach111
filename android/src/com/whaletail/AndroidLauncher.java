@@ -3,10 +3,16 @@ package com.whaletail;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
+import android.util.Log;
+import android.view.View;
+import android.widget.FrameLayout;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
@@ -25,6 +31,7 @@ import com.whaletail.interfaces.AdWatcher;
 import com.whaletail.interfaces.Analytic;
 import com.whaletail.interfaces.GameService;
 import com.whaletail.interfaces.OnAdCallback;
+import com.whaletail.interfaces.OnRetryPressed;
 
 
 public class AndroidLauncher extends AndroidApplication implements RewardedVideoAdListener, GameService {
@@ -88,6 +95,11 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
         mRewardedVideoAd.setRewardedVideoAdListener(this);
 
 
+        final InterstitialAd mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-8186248102983118/7491976786");
+        mInterstitialAd.loadAd(new AdRequest.Builder()
+                .addTestDevice("0DC86204419E0F6C995FC85EB3744EAF").build());
+
         loadRewardedVideoAd();
         CantReachGame game = new CantReachGame(new Analytic() {
             @Override
@@ -128,7 +140,33 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
             }
 
             @Override
-            public void pressedRetry(int tries) {
+            public void pressedRetry(int tries, final OnRetryPressed onRetryPressed) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mInterstitialAd.isLoaded()) {
+                            mInterstitialAd.show();
+                        } else {
+                            Log.d("TAG", "The interstitial wasn't loaded yet.");
+                        }
+
+                        mInterstitialAd.setAdListener(new AdListener() {
+                            @Override
+                            public void onAdFailedToLoad(int i) {
+                                onRetryPressed.onWatchedAd();
+                                mInterstitialAd.loadAd(new AdRequest.Builder().build());
+                            }
+
+                            @Override
+                            public void onAdClosed() {
+                                onRetryPressed.onWatchedAd();
+                                mInterstitialAd.loadAd(new AdRequest.Builder().build());
+                            }
+                        });
+                    }
+                });
+
+
                 Bundle params = new Bundle();
                 params.putString("nav", "retry");
                 params.putInt("tries", tries);
@@ -177,8 +215,13 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
                     }
                 },
                 this);
-        initialize(game, config);
+        View view = initializeForView(game, config);
 
+        setContentView(R.layout.general_activity);
+
+        ((AdView) findViewById(R.id.banner)).loadAd(new AdRequest.Builder()
+                .addTestDevice("64b00758-fdc5-4402-91ef-f3045bcadcb8").build());
+        ((FrameLayout) findViewById(R.id.fl_game_view)).addView(view, 0);
 
     }
 
@@ -193,7 +236,7 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
         String testAd = "ca-app-pub-3940256099942544/5224354917";
         mRewardedVideoAd.loadAd(productionAd,
                 new AdRequest.Builder()
-//                        .addTestDevice("AE901101C564DAFE18B7BA29B1A6CA1A")
+                        .addTestDevice("64b00758-fdc5-4402-91ef-f3045bcadcb8")
                         .build());
     }
 
@@ -346,6 +389,7 @@ public class AndroidLauncher extends AndroidApplication implements RewardedVideo
             }
         }
     }
+
 
     @Override
     public void onResume() {

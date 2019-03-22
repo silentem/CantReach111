@@ -17,6 +17,7 @@ import com.whaletail.gui.Button;
 import com.whaletail.gui.Text;
 import com.whaletail.gui.ViewActor;
 import com.whaletail.interfaces.OnAdCallback;
+import com.whaletail.interfaces.OnRetryPressed;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.forever;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.moveTo;
@@ -88,9 +89,13 @@ public class LossScreen extends BaseScreen {
         againButton.addListener(new ActorGestureListener() {
             @Override
             public void tap(InputEvent event, float x, float y, int count, int button) {
-                game.setScreen(game.gameScreen);
                 game.tries++;
-                game.analytic.pressedRetry(game.tries);
+                game.analytic.pressedRetry(game.tries, new OnRetryPressed() {
+                    @Override
+                    public void onWatchedAd() {
+                        game.setScreen(game.gameScreen);
+                    }
+                });
             }
         });
         againButton.setOrigin(againButton.getWidth() / 2, againButton.getHeight() / 2);

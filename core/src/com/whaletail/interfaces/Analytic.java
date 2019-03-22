@@ -12,7 +12,7 @@ public interface Analytic {
 
     void pressedPlay();
 
-    void pressedRetry(int tries);
+    void pressedRetry(int tries, OnRetryPressed onRetryPressed);
 
     void pressedOnWatchAd();
 
